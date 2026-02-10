@@ -1,0 +1,159 @@
+File found: refrensi/Data/Rawdata/Energi Terbarukan(AutoRecovered).xlsx
+Sheet names: ['Sheet1', 'Energi Surya-1', 'Energi Surya-2', 'Bioenergi', 'Energi Air', 'Energi Air (%)', 'Kebijakan & Program', 'Infrastruktur Energi', 'Aset Energi Alam', 'Akses Energi-1', 'Akses Energi-2', 'Kerusakan Lingkungan', 'Desa Tambang']
+
+--- Sheet: Sheet1 ---
+    0    1                              2                                                               3                                       4                                                  5                                                                                                                               6
+0 NaN  NaN                            NaN                                                             NaN                                     NaN                                                NaN                                                                                                                             NaN
+1 NaN  NaN                            NaN                                                             NaN                                     NaN                                                NaN                                                                                                                             NaN
+2 NaN   No      Dimensi Energi Terbarukan                                     Variabel / Pertanyaan PODES                              Kode PODES             Data yang diperlukan (kalkulasi Aulia)                                                                          Potensi Temuan Deskriptif Statistik (Apa yang Menarik)
+3 NaN    1                   Energi Surya            Penerangan jalan desa menggunakan lampu tenaga surya                                   R502a  Persentasenya secara nasional dan secara provinsi  Persentase desa yang sudah menggunakan lampu surya; perbandingan desa terpencil vs non-terpencil; indikasi inovasi energi desa
+4 NaN    2                   Energi Surya                    Keluarga yang menggunakan lampu tenaga surya                                   R501c  Persentasenya secara nasional dan secara provinsi                                 Proporsi rumah tangga pengguna surya; indikasi kemiskinan energi atau wilayah tanpa listrik PLN
+5 NaN    3                      Bioenergi                   Penggunaan biogas sebagai bahan bakar memasak                                 R503a.6  Persentasenya secara nasional dan secara provinsi          Tingkat adopsi biogas (biasanya sangat rendah → menarik sebagai rare event); korelasi dengan desa pertanian/peternakan
+6 NaN    4  Energi Air (Hidro/Mikrohidro)  Pemanfaatan sungai/danau/waduk/embung untuk pembangkit listrik  R510–R512 (kolom “Pembangkit listrik”)  Persentasenya secara nasional dan secara provinsi                         Jumlah desa yang memanfaatkan air untuk listrik; gap besar antara potensi air dan realisasi pemanfaatan
+7 NaN    5            Kebijakan & Program               Keberadaan program pengembangan energi terbarukan                                  R1504a  Persentasenya secara nasional dan secara provinsi                                   Perbandingan desa yang punya program vs yang punya pemanfaatan nyata (program ≠ implementasi)
+8 NaN    6           Infrastruktur Energi                              Keberadaan sarana prasarana energi                                  R1503a  Persentasenya secara nasional dan secara provinsi                         Hubungan antara ketersediaan infrastruktur dan penggunaan EBT; desa dengan infrastruktur tapi tanpa EBT
+9 NaN    7               Aset Energi Alam                                  Keberadaan mata air milik desa                                  R1403g  Persentasenya secara nasional dan secara provinsi                            Banyak desa punya aset air tapi belum dimanfaatkan untuk energi; indikasi unused renewable potential
+--- Sheet: Energi Surya-1 ---
+    0                                                              1            2          3            4      5           6      7
+0 NaN                                                            NaN          NaN        NaN          NaN    NaN         NaN    NaN
+1 NaN                                                       Nasional          NaN        NaN          NaN    NaN         NaN    NaN
+2 NaN                                                       Kategori  Subkategori       2024  Presentase    2021  Presentase    NaN
+3 NaN  Penggunaan lampu tenaga surya untuk penerangan jalan (publik)          Ada      30476    36.162134  24766   29.449677    NaN
+4 NaN                                                            NaN    Tidak ada      53800    63.837866  59330   70.550323    NaN
+5 NaN                                                          Total          NaN      84276          100  84096       100.0    NaN
+6 NaN                                                            NaN          NaN        NaN          NaN    NaN         NaN    NaN
+7 NaN                                                       Provinsi          NaN        NaN          NaN    NaN         NaN    NaN
+8 NaN                                                  Nama Provinsi         2024        NaN        Total   2021         NaN  Total
+9 NaN                                                            NaN          Ada  Tidak Ada          NaN    Ada   Tidak Ada    NaN
+--- Sheet: Energi Surya-2 ---
+    0                                                      1                    2        3           4      5           6   7   8      9
+0 NaN                                                    NaN                  NaN      NaN         NaN    NaN         NaN NaN NaN    NaN
+1 NaN                                               Nasional                  NaN      NaN         NaN    NaN         NaN NaN NaN    NaN
+2 NaN                                               Kategori          Subkategori   2024.0  Presentase   2021  Presentase NaN NaN    NaN
+3 NaN  Penggunaan lampu tenaga surya di tingkat rumah tangga  Ada, sebagian besar   3076.0    3.649912   4176    4.965753 NaN NaN    NaN
+4 NaN                                                    NaN  Ada, sebagian kecil   8019.0    9.515164   7895     9.38808 NaN NaN    NaN
+5 NaN                                                    NaN            Tidak ada  73181.0   86.834923  72025   85.646166 NaN NaN    NaN
+6 NaN                                                 Jumlah                  NaN  84276.0       100.0  84096         100 NaN NaN    NaN
+7 NaN                                                    NaN                  NaN      NaN         NaN    NaN         NaN NaN NaN    NaN
+8 NaN                                               Provinsi                  NaN      NaN         NaN    NaN         NaN NaN NaN    NaN
+9 NaN                                          Nama Provinsi                 2024      NaN         NaN  Total        2021 NaN NaN  Total
+--- Sheet: Bioenergi ---
+    0                               1            2          3           4      5           6      7
+0 NaN                             NaN          NaN        NaN         NaN    NaN         NaN    NaN
+1 NaN                        Nasional          NaN        NaN         NaN    NaN         NaN    NaN
+2 NaN                        Kategori  Subkategori       2024  Presentase   2021  Presentase    NaN
+3 NaN  Pemanfaatan bahan bakar biogas          Ada        601    0.713133    749    0.890649    NaN
+4 NaN                             NaN    Tidak ada      83675   99.286867  83347   99.109351    NaN
+5 NaN                         Jumlah           NaN      84276         100  84096         100    NaN
+6 NaN                             NaN          NaN        NaN         NaN    NaN         NaN    NaN
+7 NaN                        Provinsi          NaN        NaN         NaN    NaN         NaN    NaN
+8 NaN                   Nama Provinsi         2024        NaN       Total   2021         NaN  Total
+9 NaN                             NaN          Ada  Tidak Ada         NaN    Ada   Tidak Ada    NaN
+--- Sheet: Energi Air ---
+   0                                                          1                                                                             2       3           4       5           6   7   8   9   10                            11                                                                                                                                                                       12        13          14        15          16
+0 NaN                                                        NaN                                                                           NaN     NaN         NaN     NaN         NaN NaN NaN NaN NaN                           NaN                                                                                                                                                                      NaN       NaN         NaN       NaN         NaN
+1 NaN                                                   Nasional                                                                           NaN     NaN         NaN     NaN         NaN NaN NaN NaN NaN                      Nasional                                                                                                                                                                      NaN       NaN         NaN       NaN         NaN
+2 NaN                                                   Kategori                                                                   Subkategori  2024.0  Presentase  2021.0  Presentase NaN NaN NaN NaN                      Kategori                                                                                                                                                              Subkategori    2024.0  Presentase    2021.0  Presentase
+3 NaN  Pemanfaatan sumber daya perairan untuk pembangkit listrik                                                                        Sungai   743.0   71.511068   934.0   73.427673 NaN NaN NaN NaN  Potensi sumber daya perairan                                                                                                                                                                   Sungai   67050.0    55.62192   66636.0   54.941213
+4 NaN                                                        NaN                                                               Saluran irigasi   144.0    13.85948   176.0   13.836478 NaN NaN NaN NaN                           NaN                                                                                                                                                          Saluran irigasi   36685.0   30.432366   35926.0   29.620896
+5 NaN                                                        NaN                                                    Danau/waduk/situ/bendungan   135.0   12.993263   135.0   10.613208 NaN NaN NaN NaN                           NaN                                                                                                                                               Danau/waduk/situ/bendungan    5954.0    4.939193    5911.0    4.873605
+6 NaN                                                        NaN                                                                        Embung    17.0    1.636189    27.0    2.122642 NaN NaN NaN NaN                           NaN                                                                                                                                                                   Embung   10857.0     9.00652   12813.0   10.564286
+7 NaN                                                    Jumlah                                                                            NaN  1039.0         100  1272.0         100 NaN NaN NaN NaN                       Jumlah                                                                                                                                                                       NaN  120546.0         100  121286.0       100.0
+8 NaN                                                        NaN                                                                           NaN     NaN         NaN     NaN         NaN NaN NaN NaN NaN                           NaN                                                                                                                                                                      NaN       NaN         NaN       NaN         NaN
+9 NaN                                                  Deskirpsi  Jumlah (desa) yang memanfaatan sumber daya perairan untuk pembangkit listrik     NaN         NaN     NaN         NaN NaN NaN NaN NaN                     Deskirpsi  Data potensi yang ditampilkan dalam tabel lebih merepresentasikan jumlah desa yang memiliki sumber perairan bukan kelayakan teknis untuk pembangunan pembangkit listrik       NaN         NaN       NaN         NaN
+--- Sheet: Energi Air (%) ---
+   0                                                          1                                                                             2       3           4       5           6   7         8         9   10                            11                                                                                                                                                                       12        13          14        15          16
+0 NaN                                                        NaN                                                                           NaN     NaN         NaN     NaN         NaN NaN       NaN       NaN NaN                           NaN                                                                                                                                                                      NaN       NaN         NaN       NaN         NaN
+1 NaN                                                   Nasional                                                                           NaN     NaN         NaN     NaN         NaN NaN       NaN       NaN NaN                      Nasional                                                                                                                                                                      NaN       NaN         NaN       NaN         NaN
+2 NaN                                                   Kategori                                                                   Subkategori  2024.0  Presentase  2021.0  Presentase NaN       NaN       NaN NaN                      Kategori                                                                                                                                                              Subkategori    2024.0  Presentase    2021.0  Presentase
+3 NaN  Pemanfaatan sumber daya perairan untuk pembangkit listrik                                                                        Sungai   743.0   71.511068   934.0   73.427673 NaN  0.011081  0.014016 NaN  Potensi sumber daya perairan                                                                                                                                                                   Sungai   67050.0    55.62192   66636.0   54.941213
+4 NaN                                                        NaN                                                               Saluran irigasi   144.0    13.85948   176.0   13.836478 NaN  0.003925  0.004899 NaN                           NaN                                                                                                                                                          Saluran irigasi   36685.0   30.432366   35926.0   29.620896
+5 NaN                                                        NaN                                                    Danau/waduk/situ/bendungan   135.0   12.993263   135.0   10.613208 NaN  0.022674  0.022839 NaN                           NaN                                                                                                                                               Danau/waduk/situ/bendungan    5954.0    4.939193    5911.0    4.873605
+6 NaN                                                        NaN                                                                        Embung    17.0    1.636189    27.0    2.122642 NaN  0.001566  0.002107 NaN                           NaN                                                                                                                                                                   Embung   10857.0     9.00652   12813.0   10.564286
+7 NaN                                                    Jumlah                                                                            NaN  1039.0         100  1272.0         100 NaN       NaN       NaN NaN                       Jumlah                                                                                                                                                                       NaN  120546.0         100  121286.0       100.0
+8 NaN                                                        NaN                                                                           NaN     NaN         NaN     NaN         NaN NaN       NaN       NaN NaN                           NaN                                                                                                                                                                      NaN       NaN         NaN       NaN         NaN
+9 NaN                                                  Deskirpsi  Jumlah (desa) yang memanfaatan sumber daya perairan untuk pembangkit listrik     NaN         NaN     NaN         NaN NaN       NaN       NaN NaN                     Deskirpsi  Data potensi yang ditampilkan dalam tabel lebih merepresentasikan jumlah desa yang memiliki sumber perairan bukan kelayakan teknis untuk pembangunan pembangkit listrik       NaN         NaN       NaN         NaN
+--- Sheet: Kebijakan & Program ---
+    0                                                  1            2          3            4
+0 NaN                                                NaN          NaN        NaN          NaN
+1 NaN                                           Nasional          NaN        NaN          NaN
+2 NaN                                           Kategori  Subkategori       2024  Presentase 
+3 NaN  Keberadaan program pengembangan energi terbarukan          Ada       4525     5.369263
+4 NaN                                                NaN    Tidak ada      79751    94.630737
+5 NaN                                              Total          NaN      84276        100.0
+6 NaN                                                NaN          NaN        NaN          NaN
+7 NaN                                           Provinsi          NaN        NaN          NaN
+8 NaN                                      Nama Provinsi         2024        NaN        Total
+9 NaN                                                NaN          Ada  Tidak Ada          NaN
+--- Sheet: Infrastruktur Energi ---
+    0                                   1            2          3            4
+0 NaN                                 NaN          NaN        NaN          NaN
+1 NaN                            Nasional          NaN        NaN          NaN
+2 NaN                            Kategori  Subkategori       2024  Presentase 
+3 NaN  Keberadaan sarana prasarana energi          Ada       7346     8.716598
+4 NaN                                 NaN    Tidak ada      76930    91.283402
+5 NaN                               Total          NaN      84276          100
+6 NaN                                 NaN          NaN        NaN          NaN
+7 NaN                            Provinsi          NaN        NaN          NaN
+8 NaN                       Nama Provinsi         2024        NaN        Total
+9 NaN                                 NaN          Ada  Tidak Ada          NaN
+--- Sheet: Aset Energi Alam ---
+    0              1                2        3            4      5            6   7   8      9
+0 NaN            NaN              NaN      NaN          NaN    NaN          NaN NaN NaN    NaN
+1 NaN       Nasional              NaN      NaN          NaN    NaN          NaN NaN NaN    NaN
+2 NaN       Kategori      Subkategori   2024.0  Presentase    2021  Presentase  NaN NaN    NaN
+3 NaN       mata air              Ada  23076.0    27.381461  21662    25.758657 NaN NaN    NaN
+4 NaN            NaN        Tidak ada  52714.0    62.549243  53973    64.180223 NaN NaN    NaN
+5 NaN            NaN  Tidak diketahui   8486.0    10.069296   8461    10.061121 NaN NaN    NaN
+6 NaN          Total              NaN  84276.0          100  84096          100 NaN NaN    NaN
+7 NaN            NaN              NaN      NaN          NaN    NaN          NaN NaN NaN    NaN
+8 NaN       Provinsi              NaN      NaN          NaN    NaN          NaN NaN NaN    NaN
+9 NaN  Nama Provinsi             2024      NaN          NaN  Total         2021 NaN NaN  Total
+--- Sheet: Akses Energi-1 ---
+    0                                  1          2           3       4           5
+0 NaN                                NaN        NaN         NaN     NaN         NaN
+1 NaN                           Nasional        NaN         NaN     NaN         NaN
+2 NaN                           Kategori     2024.0        2021     NaN         NaN
+3 NaN  Keluarga pengguna listrik Non-PLN  1177328.0     1526832     NaN         NaN
+4 NaN                                NaN        NaN         NaN     NaN         NaN
+5 NaN                           Provinsi        NaN         NaN     NaN         NaN
+6 NaN                      Nama Provinsi     2024.0  Presentase  2021.0  Presentase
+7 NaN                                NaN        NaN         NaN     NaN         NaN
+8 NaN                               ACEH     2681.0    0.228111  2636.0    0.172645
+9 NaN                               BALI      341.0    0.029014   178.0    0.011658
+--- Sheet: Akses Energi-2 ---
+    0                                1         2           3       4           5
+0 NaN                              NaN       NaN         NaN     NaN         NaN
+1 NaN                         Nasional       NaN         NaN     NaN         NaN
+2 NaN                         Kategori    2024.0        2021     NaN         NaN
+3 NaN  Keluarga bukan pengguna listrik  658782.0      991671     NaN         NaN
+4 NaN                              NaN       NaN         NaN     NaN         NaN
+5 NaN                         Provinsi       NaN         NaN     NaN         NaN
+6 NaN                    Nama Provinsi    2024.0  Presentase  2021.0  Presentase
+7 NaN                              NaN       NaN         NaN     NaN         NaN
+8 NaN                             ACEH    3988.0     0.60536  5647.0    0.569443
+9 NaN                             BALI      17.0     0.00258   157.0    0.015832
+--- Sheet: Kerusakan Lingkungan ---
+   0               1            2          3            4      5            6      7   8                 9            10         11           12     13           14     15  16                17           18         19           20     21           22     23
+0 NaN             NaN          NaN        NaN          NaN    NaN          NaN    NaN NaN               NaN          NaN        NaN          NaN    NaN          NaN    NaN NaN               NaN          NaN        NaN          NaN    NaN          NaN    NaN
+1 NaN        Nasional          NaN        NaN          NaN    NaN          NaN    NaN NaN          Nasional          NaN        NaN          NaN    NaN          NaN    NaN NaN          Nasional          NaN        NaN          NaN    NaN          NaN    NaN
+2 NaN        Kategori  Subkategori       2024  Presentase    2021  Presentase     NaN NaN          Kategori  Subkategori       2024  Presentase    2021  Presentase     NaN NaN          Kategori  Subkategori       2024  Presentase    2021  Presentase     NaN
+3 NaN  Pencemaran Air          Ada      11019    13.074897  10683    12.703339    NaN NaN  Pencemaran Tanah          Ada        947     1.123689   1499     1.782487    NaN NaN  Pencemaran Tanah          Ada       4754     5.640989   5644     6.711377    NaN
+4 NaN             NaN    Tidak ada      73257    86.925103  73413    87.296661    NaN NaN               NaN    Tidak ada      83329    98.876311  82597    98.217513    NaN NaN               NaN    Tidak ada      79522    94.359011  78452    93.288623    NaN
+5 NaN           Total          NaN      84276          100  84096        100.0    NaN NaN             Total          NaN      84276          100  84096          100    NaN NaN             Total          NaN      84276          100  84096        100.0    NaN
+6 NaN             NaN          NaN        NaN          NaN    NaN          NaN    NaN NaN               NaN          NaN        NaN          NaN    NaN          NaN    NaN NaN               NaN          NaN        NaN          NaN    NaN          NaN    NaN
+7 NaN        Provinsi          NaN        NaN          NaN    NaN          NaN    NaN NaN          Provinsi          NaN        NaN          NaN    NaN          NaN    NaN NaN          Provinsi          NaN        NaN          NaN    NaN          NaN    NaN
+8 NaN   Nama Provinsi         2024        NaN        Total   2021          NaN  Total NaN     Nama Provinsi         2024        NaN        Total   2021          NaN  Total NaN     Nama Provinsi         2024        NaN        Total   2021          NaN  Total
+9 NaN             NaN          Ada  Tidak Ada          NaN    Ada    Tidak Ada    NaN NaN               NaN          Ada  Tidak Ada          NaN    Ada    Tidak Ada    NaN NaN               NaN          Ada  Tidak Ada          NaN    Ada    Tidak Ada    NaN
+--- Sheet: Desa Tambang ---
+   0                                1            2          3            4      5            6      7   8                                                                                9            10         11           12     13           14     15
+0 NaN                              NaN          NaN        NaN          NaN    NaN          NaN    NaN NaN                                                                              NaN          NaN        NaN          NaN    NaN          NaN    NaN
+1 NaN                         Nasional          NaN        NaN          NaN    NaN          NaN    NaN NaN                                                                         Nasional          NaN        NaN          NaN    NaN          NaN    NaN
+2 NaN                         Kategori  Subkategori       2024  Presentase    2021  Presentase     NaN NaN                                                                         Kategori  Subkategori       2024  Presentase    2021  Presentase     NaN
+3 NaN  Desa dengan lokasi penggalian C          Ada      15927    18.898619  16334     19.42304    NaN NaN  Penghasilan utama sebagian penduduk desa di bidang pertambangan dan penggalian           Ada        937     1.111823    599     0.712281    NaN
+4 NaN                              NaN    Tidak ada      68349    81.101381  67762     80.57696    NaN NaN                                                                              NaN    Tidak ada      83339    98.888177  83497    99.287719    NaN
+5 NaN                            Total          NaN      84276          100  84096          100    NaN NaN                                                                            Total          NaN      84276          100  84096        100.0    NaN
+6 NaN                              NaN          NaN        NaN          NaN    NaN          NaN    NaN NaN                                                                              NaN          NaN        NaN          NaN    NaN          NaN    NaN
+7 NaN                         Provinsi          NaN        NaN          NaN    NaN          NaN    NaN NaN                                                                         Provinsi          NaN        NaN          NaN    NaN          NaN    NaN
+8 NaN                    Nama Provinsi         2024        NaN        Total   2021          NaN  Total NaN                                                                    Nama Provinsi         2024        NaN        Total   2021          NaN  Total
+9 NaN                              NaN          Ada  Tidak Ada          NaN    Ada    Tidak Ada    NaN NaN                                                                              NaN          Ada  Tidak Ada          NaN    Ada    Tidak Ada    NaN

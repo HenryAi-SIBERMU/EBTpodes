@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Streamlit
+.streamlit/config.toml
+# Note: Keep config.toml if you want specific themes, but typically safe
+# In this case, we have showSidebarNavigation = false, so we MUST include it on GitHub
+!.streamlit/config.toml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large Data (Optional - if excel is large)
+*.xlsx
+*.csv

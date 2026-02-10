@@ -1,0 +1,34 @@
+No Dimensi Energi Terbarukan Variabel / Pertanyaan PODES Kode PODES Data yang diperlukan (kalkulasi Aulia) Potensi Temuan Deskriptif Statistik (Apa yang Menarik)
+1 Energi Surya Penerangan jalan desa menggunakan lampu tenaga R502a Persentasenya secara nasional dan secara Persentase desa yang sudah menggunakan lampu surya; perbandingan desa terpencil vs non-
+2 Energi Surya sKuerlyuaarga yang menggunakan lampu tenaga surya R501c pPerorsveinnstiasenya secara nasional dan secara tPerroppeonrcsiil ;r uinmdaikha stai inngogvaa spie enngegrugni dae ssuarya; indikasi kemiskinan energi atau wilayah tanpa listrik
+3 Bioenergi Penggunaan biogas sebagai bahan bakar memasak R503a.6 pPerorsveinnstiasenya secara nasional dan secara PTiLnNgkat adopsi biogas (biasanya sangat rendah → menarik sebagai rare event); korelasi
+4 Energi Air (Hidro/Mikrohidro) Pemanfaatan sungai/danau/waduk/embung untuk R510–R512 pPerorsveinnstiasenya secara nasional dan secara dJuemnglaahn ddeessaa ypaenrgta mnieamn/apneftaeartnkaakna nair untuk listrik; gap besar antara potensi air dan realisasi
+5 Kebijakan & Program pKeembebraandgakaint lpisrtorgikram pengembangan energi terbarukan (Rk1o5l0o4ma pPerorsveinnstiasenya secara nasional dan secara pPeermbaannfdaiantgaann desa yang punya program vs yang punya pemanfaatan nyata (program ≠
+6 Infrastruktur Energi Keberadaan sarana prasarana energi “RP15e0m3baangki pPerorsveinnstiasenya secara nasional dan secara iHmupbluenmgeannt aasnit)ara ketersediaan infrastruktur dan penggunaan EBT; desa dengan infrastruktur
+7 Aset Energi Alam Keberadaan mata air milik desa tR l1i4st0r3ikg”) pPerorsveinnstiasenya secara nasional dan secara tBaapniy taakn pdae sEaB pTunya aset air tapi belum dimanfaatkan untuk energi; indikasi unused renewable
+8 Akses Energi Keluarga pengguna listrik Non-PLN R501a.2 pPerorsveinnstiasenya secara nasional dan secara pKootnesnetniatlrasi desa non-PLN; peluang EBT sebagai substitusi listrik konvensional
+9 Akses Energi Akses Energi R501b pPerorsveinnstiasenya secara nasional dan secara Identifikasi desa rentan energi; wilayah prioritas intervensi energi terbarukan
+10 Kerusakan lingkungan Pencemaran lingkungan R514 pPerorsveinnstiasenya secara nasional dan secara
+provinsi
+SLide tambashcarneenshot cover riset celios
+Indeks Desa Tambang (Binary Komposit)
+Definisi operasional:
+Desa tambang =
+(R403a = pertambangan) ATAU (R518 = ada lokasi penggalian)
+Kondisi Kode
+Desa tambang 1
+Desa non-tambang 0
+Aulia Lianasari: Minta tolong di crosstab yang poin diatas dengan desa tambang dan non tambang ini ya. Command tabulasi sederhana aja
+
+[TABLE 1 on page 1]
+No | Dimensi Energi Terbarukan | Variabel / Pertanyaan PODES | Kode PODES | Data yang diperlukan (kalkulasi Aulia) | Potensi Temuan Deskriptif Statistik (Apa yang Menarik)
+1 | Energi Surya | Penerangan jalan desa menggunakan lampu tenaga | R502a | Persentasenya secara nasional dan secara | Persentase desa yang sudah menggunakan lampu surya; perbandingan desa terpencil vs non-
+2 | Energi Surya | sKuerlyuaarga yang menggunakan lampu tenaga surya | R501c | pPerorsveinnstiasenya secara nasional dan secara | tPerroppeonrcsiil ;r uinmdaikha stai inngogvaa spie enngegrugni dae ssuarya; indikasi kemiskinan energi atau wilayah tanpa listrik
+3 | Bioenergi | Penggunaan biogas sebagai bahan bakar memasak | R503a.6 | pPerorsveinnstiasenya secara nasional dan secara | PTiLnNgkat adopsi biogas (biasanya sangat rendah → menarik sebagai rare event); korelasi
+4 | Energi Air (Hidro/Mikrohidro) | Pemanfaatan sungai/danau/waduk/embung untuk | R510–R512 | pPerorsveinnstiasenya secara nasional dan secara | dJuemnglaahn ddeessaa ypaenrgta mnieamn/apneftaeartnkaakna nair untuk listrik; gap besar antara potensi air dan realisasi
+5 | Kebijakan & Program | pKeembebraandgakaint lpisrtorgikram pengembangan energi terbarukan | (Rk1o5l0o4ma | pPerorsveinnstiasenya secara nasional dan secara | pPeermbaannfdaiantgaann desa yang punya program vs yang punya pemanfaatan nyata (program ≠
+6 | Infrastruktur Energi | Keberadaan sarana prasarana energi | “RP15e0m3baangki | pPerorsveinnstiasenya secara nasional dan secara | iHmupbluenmgeannt aasnit)ara ketersediaan infrastruktur dan penggunaan EBT; desa dengan infrastruktur
+7 | Aset Energi Alam | Keberadaan mata air milik desa | tR l1i4st0r3ikg”) | pPerorsveinnstiasenya secara nasional dan secara | tBaapniy taakn pdae sEaB pTunya aset air tapi belum dimanfaatkan untuk energi; indikasi unused renewable
+8 | Akses Energi | Keluarga pengguna listrik Non-PLN | R501a.2 | pPerorsveinnstiasenya secara nasional dan secara | pKootnesnetniatlrasi desa non-PLN; peluang EBT sebagai substitusi listrik konvensional
+9 | Akses Energi | Akses Energi | R501b | pPerorsveinnstiasenya secara nasional dan secara | Identifikasi desa rentan energi; wilayah prioritas intervensi energi terbarukan
+10 | Kerusakan lingkungan | Pencemaran lingkungan | R514 | pPerorsveinnstiasenya secara nasional dan secara | 
