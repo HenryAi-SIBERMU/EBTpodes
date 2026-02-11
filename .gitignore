@@ -18,3 +18,4 @@ Thumbs.db
 # Large Data (Optional - if excel is large)
 *.xlsx
 *.csv
+!data/processed/*.csv
