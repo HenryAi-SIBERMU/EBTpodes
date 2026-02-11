@@ -161,7 +161,9 @@ SIMILAR_MAPPING = {
     "Factor Analysis / PCA": "Composite Index",
     "AHP": "Composite Index",
     "Techno-Economic Analysis": "Gap / Ratio Analysis", 
-    "Descriptive Statistics": "Rate of Change / Trend"
+    "Descriptive Statistics": "Rate of Change / Trend",
+    "Descriptive Study": "Rate of Change / Trend", # New mapping
+    "Descriptive Analysis": "Rate of Change / Trend" # New mapping
 }
 
 # ─── API Function ───────────────────────────────────────────────
@@ -715,7 +717,7 @@ if "discovery_corpus" in st.session_state and st.session_state["discovery_corpus
         st.markdown("---")
         st.markdown("### Perbandingan: Metode Usulan vs Literatur")
         
-        top_10_methods = [m for m, _ in method_counter.most_common(10)]
+        top_10_methods = [m for m, _ in method_counter.most_common(15)]
         
         # Logic: Hitung Green (Direct) & Yellow (Indirect)
         validated_coverage = set()
@@ -738,9 +740,9 @@ if "discovery_corpus" in st.session_state and st.session_state["discovery_corpus
             st.markdown(f"""
             <div class="disc-card">
                 <div class="disc-title">✅ Metode Usulan yang Populer</div>
-                <div class="disc-sub">{"<br>".join(evidence_list) if evidence_list else "Tidak ada dalam Top 10"}</div>
+                <div class="disc-sub">{"<br>".join(evidence_list) if evidence_list else "Tidak ada dalam Top 15"}</div>
                 <div style="margin-top:10px; font-size:2rem; font-weight:800; color:#3fb950;">{len(validated_coverage)} / {len(OUR_METHODS)}</div>
-                <div class="stat-label">Metode Usulan Terverifikasi (Direct/Proxy)</div>
+                <div class="stat-label">Metode Usulan Terverifikasi (Top 15 Literatures)</div>
             </div>
             """, unsafe_allow_html=True)
         with m2:
@@ -755,7 +757,7 @@ if "discovery_corpus" in st.session_state and st.session_state["discovery_corpus
             
         missing_ours = OUR_METHODS - validated_coverage
         if missing_ours:
-            st.warning(f"⚠️ Metode Usulan yang **belum** masuk Top 10 literatur: {', '.join(missing_ours)}")
+            st.warning(f"⚠️ Metode Usulan yang **belum** masuk Top 15 literatur: {', '.join(missing_ours)}")
         
         # ─── Method Co-occurrence Network ───────────────────────
         st.markdown("---")
