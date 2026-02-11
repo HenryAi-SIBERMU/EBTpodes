@@ -96,11 +96,47 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- Sidebar ---
+# --- Sidebar & Data Access ---
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
+from src.utils.data_loader import load_national_data, load_provincial_data, format_number
 from src.components.sidebar import render_sidebar
+import pandas as pd
+import altair as alt
+
 render_sidebar()
+
+# --- Load Data ---
+df_nasional = load_national_data()
+df_prov = load_provincial_data()
+
+# --- Helpers ---
+def get_val(suffix, year="2024"):
+    col = f"{suffix}_{year}"
+    if not df_nasional.empty and col in df_nasional.columns:
+        return df_nasional.iloc[0][col]
+    return 0
+
+def get_growth(suffix):
+    col = f"{suffix}_growth"
+    if not df_nasional.empty and col in df_nasional.columns:
+        return df_nasional.iloc[0][col]
+    return 0
+
+# Calculated Metrics for Phase 1
+kpi1_val = get_val("R501b_tanpa_listrik")
+kpi1_growth = get_growth("R501b_tanpa_listrik")
+
+kpi2_val = get_val("R502a_pju_surya")
+kpi2_growth = get_growth("R502a_pju_surya")
+
+kpi3_val = get_val("R1504a_program_ebt")
+kpi3_growth = get_growth("R1504a_program_ebt")
+kpi3_pct = get_val("R1504a_program_ebt", "2024_pct") # Note: if exists
+
+potensi_air = get_val("R511_potensi_air", "2024")
+realisasi_air = get_val("R510_air", "2024")
+gap_ratio = (realisasi_air / potensi_air * 100) if potensi_air > 0 else 0
 
 # --- Header ---
 st.markdown('<div class="org-badge">CELIOS — Center of Economic and Law Studies</div>', unsafe_allow_html=True)
@@ -109,47 +145,151 @@ st.markdown('<div class="sub-title">Dashboard Analisis Data PODES 2024 vs 2021 �
 
 # --- KPI Cards ---
 st.markdown("### Overview Nasional")
-st.markdown('<p style="font-size: 0.9em; margin-bottom: 20px;">Metode: <b>Statistik Deskriptif (Total) & Analisis Tren (YoY Growth)</b></p>', unsafe_allow_html=True)
+st.markdown('<p style="font-size: 0.9rem; margin-bottom: 20px; color: #AAA;">Statistik Deskriptif & Analisis Tren (2021 vs 2024)</p>', unsafe_allow_html=True)
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.markdown("""
+    growth_text = f"▼ {abs(kpi1_growth):.1f}% (YoY)" if abs(kpi1_growth) < 1000 else "Data Baseline 2021 Terbatas"
+    st.markdown(f"""
     <div class="stat-card">
         <div class="stat-label">Keluarga Tanpa Listrik</div>
-        <div class="stat-number">658.782</div>
-        <div class="stat-delta-down">▼ 33,56% dari 2021</div>
+        <div class="stat-number">{format_number(kpi1_val)}</div>
+        <div class="stat-delta-down" style="color: {'#EF5350' if kpi1_growth > 0 else '#66BB6A'}">
+            {growth_text}
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
 with col2:
-    st.markdown("""
+    growth_text = f"▲ {abs(kpi2_growth):.1f}% (YoY)" if abs(kpi2_growth) < 1000 else "Data Baseline 2021 Terbatas"
+    st.markdown(f"""
     <div class="stat-card">
-        <div class="stat-label">Desa dengan PJU Surya</div>
-        <div class="stat-number">30.476</div>
-        <div class="stat-delta-down">▲ 23,06% dari 2021</div>
+        <div class="stat-label">Desa PJU Surya</div>
+        <div class="stat-number">{format_number(kpi2_val)}</div>
+        <div class="stat-delta-up">
+            {growth_text}
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
 with col3:
-    st.markdown("""
+    growth_text = f"▲ {abs(kpi3_growth):.1f}% (YoY)" if abs(kpi3_growth) < 1000 else "Data Baseline 2021 Terbatas"
+    st.markdown(f"""
     <div class="stat-card">
-        <div class="stat-label">Desa Punya Program EBT</div>
-        <div class="stat-number">5,37%</div>
-        <div class="stat-delta-up">94,63% belum punya</div>
+        <div class="stat-label">Desa Ada Program EBT</div>
+        <div class="stat-number">{format_number(kpi3_val)}</div>
+        <div class="stat-delta-up">
+            {growth_text}
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
 with col4:
-    st.markdown("""
+    st.markdown(f"""
     <div class="stat-card">
-        <div class="stat-label">Gap Potensi Air vs Realisasi</div>
-        <div class="stat-number">0,86%</div>
-        <div class="stat-delta-up">120.546 potensi → 1.039 realisasi</div>
+        <div class="stat-label">Rasio Pemanfaatan Air</div>
+        <div class="stat-number">{gap_ratio:.2f}%</div>
+        <div class="stat-delta-down" style="color: #EF5350;">{format_number(realisasi_air)} dari {format_number(potensi_air)} Potensi</div>
     </div>
     """, unsafe_allow_html=True)
 
-st.caption("⚠️ Hasil olah data lain sedang dalam proses")
 st.markdown("<br>", unsafe_allow_html=True)
+
+# --- Analysis: Trends & Comparison ---
+st.markdown("### Perbandingan Adopsi EBT: 2021 vs 2024")
+
+indicators = [
+    {"label": "PJU Surya (R502a)", "suffix": "R502a_pju_surya"},
+    {"label": "Keluarga Surya (R501c)", "suffix": "R501c_keluarga_surya"},
+    {"label": "Biogas (R503a6)", "suffix": "R503a6_bioenergi"},
+    {"label": "Pemanfaatan Air (R510)", "suffix": "R510_air"},
+    {"label": "Program EBT (R1504a)", "suffix": "R1504a_program_ebt"},
+    {"label": "Infrastruktur Energi (R1503a)", "suffix": "R1503a_infra"},
+    {"label": "Mata Air (R1403g)", "suffix": "R1403g_potensi_air"},
+    {"label": "Non PLN (R501a2)", "suffix": "R501a2_non_pln"},
+    {"label": "Tanpa Listrik (R501b)", "suffix": "R501b_tanpa_listrik"},
+    {"label": "Polusi Air (R514)", "suffix": "R514_polusi_air"},
+]
+
+def prepare_chart_data(df, indicators_list):
+    chart_data = []
+    household_keys = ['R501a2_non_pln', 'R501b_tanpa_listrik', 'R501c_keluarga_surya', 'R503a6_biogas']
+    
+    for item in indicators_list:
+        key = item['suffix']
+        label = item['label']
+        col_24, col_21 = f"{key}_2024", f"{key}_2021"
+
+        if col_24 in df.columns and col_21 in df.columns:
+            val21, val24 = df[col_21].values[0], df[col_24].values[0]
+            category = "Keluarga (Unit: KK)" if key in household_keys else "Wilayah (Unit: Desa)"
+            chart_data.append({"Dimensi": label, "Tahun": "2021", "Jumlah": val21, "Category": category})
+            chart_data.append({"Dimensi": label, "Tahun": "2024", "Jumlah": val24, "Category": category})
+    return pd.DataFrame(chart_data)
+
+df_chart = prepare_chart_data(df_nasional, indicators)
+
+if not df_chart.empty:
+    chart_left, chart_right = st.columns(2)
+    with chart_left:
+        st.markdown("##### 🏠 Skala Rumah Tangga")
+        c_kk = alt.Chart(df_chart[df_chart['Category'] == "Keluarga (Unit: KK)"]).mark_bar().encode(
+            x=alt.X('Jumlah', axis=alt.Axis(format=',d')),
+            y=alt.Y('Dimensi', sort='-x', title=''),
+            color=alt.Color('Tahun', scale=alt.Scale(domain=['2021', '2024'], range=['#90CAF9', '#4CAF50'])),
+            yOffset='Tahun',
+            tooltip=['Dimensi', 'Tahun', alt.Tooltip('Jumlah', format=',d')]
+        ).properties(height=250)
+        st.altair_chart(c_kk, use_container_width=True)
+
+    with chart_right:
+        st.markdown("##### 📍 Skala Desa/Wilayah")
+        c_desa = alt.Chart(df_chart[df_chart['Category'] == "Wilayah (Unit: Desa)"]).mark_bar().encode(
+            x=alt.X('Jumlah', axis=alt.Axis(format=',d')),
+            y=alt.Y('Dimensi', sort='-x', title=''),
+            color=alt.Color('Tahun', scale=alt.Scale(domain=['2021', '2024'], range=['#90CAF9', '#4CAF50']), legend=None),
+            yOffset='Tahun',
+            tooltip=['Dimensi', 'Tahun', alt.Tooltip('Jumlah', format=',d')]
+        ).properties(height=250)
+        st.altair_chart(c_desa, use_container_width=True)
+
+# --- Section: Keadilan Energi & Kedaulatan ---
+st.markdown("---")
+st.markdown("### Analisis Kritis: Keadilan & Kedaulatan Energi")
+st.info("Visualisasi ini menyoroti ketimpangan akses dan potensi lokal yang sering terabaikan.")
+
+c_crit1, c_crit2 = st.columns([1.5, 1])
+
+with c_crit1:
+    st.markdown("##### ⚠️ Kerentanan Energi per Provinsi")
+    if not df_prov.empty and 'R501b_tanpa_listrik_2024' in df_prov.columns:
+        top_pov = df_prov.sort_values('R501b_tanpa_listrik_2024', ascending=False).head(5)
+        c_pov = alt.Chart(top_pov).mark_bar(color='#E57373', cornerRadiusEnd=4).encode(
+            x=alt.X('R501b_tanpa_listrik_2024', title='Keluarga Tanpa Listrik (2024)'),
+            y=alt.Y('Provinsi', sort='-x', title=''),
+            tooltip=['Provinsi', alt.Tooltip('R501b_tanpa_listrik_2024', format=',d')]
+        ).properties(height=250)
+        st.altair_chart(c_pov, use_container_width=True)
+    st.caption("Fokus pada daerah tertinggal merupakan prioritas dalam upaya pemerataan hak energi.")
+
+with c_crit2:
+    st.markdown("##### 💧 Kesenjangan Potensi Mikrohidro")
+    gap_data = pd.DataFrame([
+        {"Label": "Realisasi", "Value": realisasi_air},
+        {"Label": "Potensi Terbuang", "Value": potensi_air - realisasi_air}
+    ])
+    c_gap = alt.Chart(gap_data).mark_arc(innerRadius=50).encode(
+        theta=alt.Theta(field="Value", type="quantitative"),
+        color=alt.Color(field="Label", scale=alt.Scale(domain=["Realisasi", "Potensi Terbuang"], range=["#66BB6A", "#333"])),
+        tooltip=["Label", "Value"]
+    ).properties(height=200)
+    st.altair_chart(c_gap, use_container_width=True)
+    st.markdown(f"""
+    Rasio pemanfaatan: **{gap_ratio:.2f}%**<br>
+    <span style="font-size:0.85rem; color:#9E9E9E;">Transisi harus berbasis <b>desentralistik</b> dan memberdayakan potensi komunitas lokal.</span>
+    """, unsafe_allow_html=True)
+
+st.caption("⚠️ Hasil olah data lain sedang dalam proses")
 
 # --- Divider ---
 st.markdown("---")
@@ -163,11 +303,13 @@ analysis_items = [
     {"title": "Desa Tambang × EBT", "desc": "Crosstab desa tambang vs 10 dimensi energi terbarukan", "method": "Chi-Square Test & Cross-Tabulation", "status": "✅ Akses Halaman", "url": "Desa_Tambang"},
     {"title": "Gap Potensi EBT", "desc": "Potensi vs realisasi per provinsi, tren menurun", "method": "Gap Ratio & Efficiency Ranking", "status": "✅ Akses Halaman", "url": "Gap_Potensi_EBT"},
     {"title": "Ketimpangan Energi", "desc": "Indeks Kerentanan Energi (IKE) per provinsi", "method": "Composite Index (Weighted Sum + Min-Max)", "status": "✅ Akses Halaman", "url": "Ketimpangan_Energi"},
+    {"title": "Analisis Bibliometric", "desc": "Pemetaan literatur riset EBT global", "method": "LLM-assisted Text Mining", "status": "✅ Akses Halaman", "url": "Bibliometric_Discovery"},
 ]
 
 resource_items = [
     {"title": "Eksplorasi Data", "desc": "Filter interaktif, tabel, download CSV", "status": "✅ Akses Halaman", "url": "Eksplorasi_Data"},
     {"title": "Dokumentasi Riset", "desc": "Report insight, strategi narasi, metodologi", "status": "✅ Akses Halaman", "url": "Dokumentasi_Riset"},
+    {"title": "Validasi Metode", "desc": "Harvesting referensi riset", "status": "✅ Akses Halaman", "url": "Validasi_Metode"},
 ]
 
 nav_col1, nav_col2 = st.columns(2)

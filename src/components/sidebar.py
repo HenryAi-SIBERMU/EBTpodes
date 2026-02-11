@@ -39,7 +39,9 @@ def render_sidebar():
         st.page_link("pages/2_Desa_Tambang.py", label="Desa Tambang", icon=None)
         st.page_link("pages/3_Gap_Potensi_EBT.py", label="Gap Potensi EBT", icon=None)
         st.page_link("pages/4_Ketimpangan_Energi.py", label="Ketimpangan Energi", icon=None)
+        st.page_link("pages/8_Bibliometric_Discovery.py", label="Bibliometric", icon=None)
         
         st.markdown("### Resources")
         st.page_link("pages/5_Eksplorasi_Data.py", label="Eksplorasi Data", icon=None)
         st.page_link("pages/6_Dokumentasi_Riset.py", label="Dokumentasi Riset", icon=None)
+        st.page_link("pages/7_Validasi_Metode.py", label="Validasi Metode", icon=None)
