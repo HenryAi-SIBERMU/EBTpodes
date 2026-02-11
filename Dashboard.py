@@ -1,6 +1,16 @@
 import streamlit as st
+import pandas as pd
+import altair as alt
+import scipy.stats as stats
 import os
+import sys
 
+# Add project root to sys.path
+sys.path.insert(0, os.path.dirname(__file__))
+from src.utils.data_loader import load_national_data, load_provincial_data, format_number
+from src.components.sidebar import render_sidebar
+
+# --- Page Config (Global) ---
 st.set_page_config(
     page_title="CELIOS — EBT Dashboard",
     page_icon=os.path.join(os.path.dirname(__file__), "refrensi", "Celios China-Indonesia Energy Transition.png"),
@@ -97,13 +107,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Sidebar & Data Access ---
-import sys, os
-sys.path.insert(0, os.path.dirname(__file__))
-from src.utils.data_loader import load_national_data, load_provincial_data, format_number
-from src.components.sidebar import render_sidebar
-import pandas as pd
-import altair as alt
-
 render_sidebar()
 
 # --- Load Data ---
@@ -291,6 +294,261 @@ with c_crit2:
     """, unsafe_allow_html=True)
 
 st.caption("⚠️ Hasil olah data lain sedang dalam proses")
+
+
+# ==========================================
+# 2. ANALISIS DESA TAMBANG (Integrasi)
+# ==========================================
+st.markdown("---")
+st.header("Analisis Desa Tambang × EBT")
+st.markdown('<p style="font-size: 1rem; color: #66BB6A; font-weight: 500; margin-top: -15px;">Deep Dive Analysis: Hubungan Ekstraktivisme dengan Indikator Keberlanjutan</p>', unsafe_allow_html=True)
+
+# Alias for compatibility with copied code
+df = df_prov 
+
+if df.empty:
+    st.error("Data provinsi tidak ditemukan.")
+else:
+    # --- Methodology Section ---
+    with st.expander("ℹ️ Metodologi: Pipeline Analisis Chi-Square (SPSS)", expanded=False):
+        st.markdown("""
+        Analisis ini menggunakan uji **Pearson Chi-Square** untuk menentukan hubungan antara aktivitas pertambangan dengan adopsi EBT.
+        
+        **Langkah-langkah (Algoritma SPSS):**
+        1.  **Binning Data**: Mengubah variabel kontinu (%) menjadi Kategori (Tinggi/Rendah) menggunakan pemisah Median.
+        2.  **Crosstabulation**: Membuat tabel silang antara status Tambang (Baris) dan status EBT (Kolom).
+        3.  **Hypothesis Testing**:
+            *   $H_0$: Tidak ada hubungan antara Tambang dan EBT.
+            *   $H_1$: Ada hubungan signifikan.
+        4.  **Decision Rule**: Jika **P-Value < 0.05**, tolak $H_0$.
+        """)
+
+    # --- 2.1 Variable Selection ---
+    st.subheader("2.1 Konfigurasi Variabel")
+
+    col_sel1, col_sel2 = st.columns(2)
+
+    with col_sel1:
+        st.markdown("##### Variabel Independen (X) - Faktor Pengaruh")
+        mining_col = "tambang_2024_pct"
+        st.info(f"**Intensitas Pertambangan** (% Desa Tambang per Provinsi)")
+        
+    with col_sel2:
+        st.markdown("##### Variabel Dependen (Y) - Indikator EBT")
+        ebt_options = {
+            "R502a_pju_surya_2024_pct": "Penerangan Jalan Umum (PJU) Surya",
+            "R501c_keluarga_surya_2024_pct": "Pengguna Listrik Surya (Keluarga)",
+            "R503a6_bioenergi_2024_pct": "Pemanfaatan Bioenergi (Biogas)",
+            "R510_air_2024_pct": "Pemanfaatan Energi Air (Mikrohidro/PLTA)",
+            "R1504a_program_ebt_2024_pct": "Keberadaan Program EBT",
+            "R1503a_infra_2024_pct": "Keberadaan Infrastruktur Energi",
+            "R1403g_potensi_air_2024_pct": "Potensi Aset Energi Alam (Mata Air)",
+            "R501a2_non_pln_2024_pct": "Akses Energi Non-PLN",
+            "R501b_tanpa_listrik_2024_pct": "Keluarga Tanpa Listrik",
+            "R514_polusi_air_2024_pct": "Pencemaran Lingkungan: Air",
+            "R514_polusi_tanah_2024_pct": "Pencemaran Lingkungan: Tanah",
+            "R514_polusi_udara_2024_pct": "Pencemaran Lingkungan: Udara"
+        }
+        # Use unique key for selectbox in dashboard (even though not in tab, safe practice)
+        y_col = st.selectbox("Pilih Indikator EBT:", list(ebt_options.keys()), format_func=lambda x: ebt_options[x], key="dash_main_y_col")
+
+    # --- Data Prep ---
+    x_median = df[mining_col].median()
+    y_median = df[y_col].median()
+
+    df["X_Cat"] = df[mining_col].apply(lambda x: "Tinggi" if x >= x_median else "Rendah")
+    df["Y_Cat"] = df[y_col].apply(lambda x: "Tinggi" if x >= y_median else "Rendah")
+
+    label_x_low = f"Rendah (<{x_median:.2f}%)"
+    label_x_high = f"Tinggi (≥{x_median:.2f}%)"
+    label_y_low = f"Rendah (<{y_median:.2f}%)"
+    label_y_high = f"Tinggi (≥{y_median:.2f}%)"
+
+    df["X_Label"] = df[mining_col].apply(lambda x: label_x_high if x >= x_median else label_x_low)
+    df["Y_Label"] = df[y_col].apply(lambda x: label_y_high if x >= y_median else label_y_low)
+
+    crosstab = pd.crosstab(df["X_Label"], df["Y_Label"])
+    cats_x = [label_x_low, label_x_high]
+    cats_y = [label_y_low, label_y_high]
+    crosstab = crosstab.reindex(index=cats_x, columns=cats_y, fill_value=0)
+
+    chi2, p, dof, expected = stats.chi2_contingency(crosstab)
+    expected_df = pd.DataFrame(expected, index=crosstab.index, columns=crosstab.columns)
+
+    # --- Results Display ---
+    st.subheader("2.2 Hasil Analisis Statistik")
+    
+    # A. Case Processing
+    st.markdown("### Case Processing Summary")
+    total_cases = len(df)
+    valid_cases = len(df.dropna(subset=[mining_col, y_col]))
+    missing_cases = total_cases - valid_cases
+    
+    columns = pd.MultiIndex.from_product([["Cases"], ["Valid", "Missing", "Total"], ["N", "Percent"]])
+    interaction_label = f"{mining_col} * {ebt_options[y_col]}"
+    row_data = [valid_cases, f"{valid_cases/total_cases*100:.1f}%", missing_cases, f"{missing_cases/total_cases*100:.1f}%", total_cases, "100.0%"]
+    st.table(pd.DataFrame([row_data], index=[interaction_label], columns=columns))
+
+    # B. Crosstab
+    st.markdown(f"### {interaction_label} Crosstabulation")
+    row_indices = []
+    for x_cat in cats_x:
+        row_indices.append((x_cat, "Count"))
+        row_indices.append((x_cat, "Expected Count"))
+    row_indices.append(("Total", "Count"))
+    row_indices.append(("Total", "Expected Count"))
+
+    rows = []
+    count_low = crosstab.loc[label_x_low].tolist()
+    exp_low = expected_df.loc[label_x_low].tolist()
+    rows.append(count_low + [sum(count_low)])
+    rows.append([f"{x:.1f}" for x in exp_low] + [f"{sum(exp_low):.1f}"])
+
+    count_high = crosstab.loc[label_x_high].tolist()
+    exp_high = expected_df.loc[label_x_high].tolist()
+    rows.append(count_high + [sum(count_high)])
+    rows.append([f"{x:.1f}" for x in exp_high] + [f"{sum(exp_high):.1f}"])
+
+    total_counts = crosstab.sum().tolist()
+    total_exp = expected_df.sum().tolist()
+    rows.append(total_counts + [sum(total_counts)])
+    rows.append([f"{x:.1f}" for x in total_exp] + [f"{sum(total_exp):.1f}"])
+
+    spss_crosstab = pd.DataFrame(rows, index=pd.MultiIndex.from_tuples(row_indices, names=[mining_col, ""]), columns=cats_y + ["Total"])
+    st.table(spss_crosstab)
+
+    # C. Chi Square
+    st.markdown("### Chi-Square Tests")
+    st.markdown(f"**{interaction_label}**")
+    
+    pearson_val = chi2
+    pearson_sig = p
+    g, p_g, dof_g, exp_g = stats.chi2_contingency(crosstab, lambda_="log-likelihood")
+    
+    x_codes = df["X_Label"].replace({label_x_low:0, label_x_high:1})
+    y_codes = df["Y_Label"].replace({label_y_low:0, label_y_high:1})
+    r, p_corr = stats.pearsonr(x_codes, y_codes)
+    lbl_val = (valid_cases - 1) * (r**2)
+    
+    chi_data = [
+        [f"{pearson_val:.3f}", str(dof), f"{pearson_sig:.3f}"],
+        [f"{g:.3f}", str(dof), f"{p_g:.3f}"],
+        [f"{lbl_val:.3f}", "1", f"{p_corr:.3f}"],
+        [str(valid_cases), "", ""]
+    ]
+    st.table(pd.DataFrame(chi_data, index=["Pearson Chi-Square", "Likelihood Ratio", "Linear-by-Linear Association", "N of Valid Cases"], columns=["Value", "df", "Asymp. Sig. (2-sided)"]))
+
+    # D. Hypothesis
+    st.markdown("### Ringkasan Uji Hipotesis")
+    col_card, col_chart = st.columns([1, 1.5])
+    
+    with col_card:
+        is_significant = pearson_sig < 0.05
+        status_text = "SIGNIFIKAN (Ada Hubungan)" if is_significant else "TIDAK SIGNIFIKAN"
+        order_color = "#4CAF50" if is_significant else "#F44336" 
+        bg_color = "rgba(76, 175, 80, 0.1)" if is_significant else "rgba(244, 67, 54, 0.1)"
+        
+        st.markdown(f"""
+        <div style="border: 2px solid {order_color}; padding: 15px; border-radius: 5px; background-color: {bg_color};">
+            <h4 style="color: {order_color}; margin: 0 0 10px 0; text-transform: uppercase;">Result: {status_text}</h4>
+            <p style="margin: 0; font-family: monospace;">
+                P-Value    : {pearson_sig:.4f}<br>
+                Chi-Square : {pearson_val:.3f}<br>
+                df         : {dof}
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        try:
+            a = crosstab.loc[label_x_low, label_y_low]
+            b = crosstab.loc[label_x_low, label_y_high]
+            c = crosstab.loc[label_x_high, label_y_low]
+            d = crosstab.loc[label_x_high, label_y_high]
+            odds_ratio = (a * d) / (b * c) if (b * c) > 0 else 0
+            st.markdown(f"**Odds Ratio (Risk Estimate):** `{odds_ratio:.3f}`")
+            
+            if is_significant:
+                 st.write("Interpretasi: Wilayah tambang memiliki kecenderungan signifikan terhadap kondisi EBT ini.")
+            else:
+                 st.write("Interpretasi: Tidak ada bukti statistik yang cukup untuk menyatakan hubungan.")
+        except:
+            st.write("-")
+
+    with col_chart:
+        st.markdown("**Visualisasi Proporsi**")
+
+    # --- 2.3 Visualization ---
+    st.markdown("---")
+    st.subheader("2.3 Visualisasi Proporsi")
+    
+    chart_data = crosstab.reset_index().melt(id_vars="X_Label", var_name="Y_Label", value_name="Count")
+    chart_data['X_Display'] = chart_data['X_Label'].apply(lambda x: f"Tambang: {x}")
+
+    viz_mode = st.radio("Pilih Tampilan Grafik:", ["Bar Chart (Proporsi)", "Heatmap (Matriks)", "Donut Chart (Komparasi)"], horizontal=True, key="dash_main_viz_mode")
+
+    if viz_mode == "Bar Chart (Proporsi)":
+        chart = alt.Chart(chart_data).mark_bar(size=40).encode(
+            x=alt.X('X_Display', title='Kategori Wilayah Tambang', axis=alt.Axis(labelAngle=0, grid=False)),
+            y=alt.Y('Count', title='Jumlah Provinsi', axis=alt.Axis(grid=False)),
+            color=alt.Color('Y_Label', title='Status EBT', scale=alt.Scale(domain=[label_y_low, label_y_high], range=['#E57373', '#81C784'])),
+            tooltip=['X_Display', 'Y_Label', 'Count']
+        ).properties(
+            height=300, 
+            title=alt.TitleParams(text='Proporsi Wilayah', anchor='start', fontSize=14)
+        ).configure_view(strokeWidth=0).configure_axis(domain=False, tickSize=0)
+        st.altair_chart(chart, use_container_width=True)
+
+    elif viz_mode == "Heatmap (Matriks)":
+        st.write("Visualisasi 'Density' Hubungan antar Variabel:")
+        base = alt.Chart(chart_data).encode(
+            x=alt.X('X_Display', title='', axis=alt.Axis(labelAngle=0)),
+            y=alt.Y('Y_Label', title='Status EBT')
+        )
+        heatmap = base.mark_rect().encode(
+            color=alt.Color('Count', legend=None, scale=alt.Scale(scheme='greens'))
+        )
+        text = base.mark_text(baseline='middle').encode(
+            text='Count',
+            color=alt.condition(alt.datum.Count > chart_data['Count'].max()/2, alt.value('white'), alt.value('black'))
+        )
+        st.altair_chart((heatmap + text).properties(height=300), use_container_width=True)
+
+    elif viz_mode == "Donut Chart (Komparasi)":
+        st.write("Perbandingan Komposisi EBT pada tiap Kategori Tambang:")
+        c1, c2 = st.columns(2)
+        with c1:
+            st.caption(f"**Wilayah Tambang: {label_x_high}**")
+            data_high = chart_data[chart_data['X_Label'] == label_x_high]
+            base_h = alt.Chart(data_high).encode(theta=alt.Theta("Count", stack=True))
+            pie_h = base_h.mark_arc(outerRadius=80, innerRadius=50).encode(
+                color=alt.Color("Y_Label", scale=alt.Scale(domain=[label_y_low, label_y_high], range=['#E57373', '#81C784']), legend=None),
+                tooltip=["Y_Label", "Count"]
+            )
+            text_h = base_h.mark_text(radius=100).encode(text=alt.Text("Count"), order=alt.Order("Y_Label"), color=alt.value("white"))
+            st.altair_chart(pie_h, use_container_width=True)
+
+        with c2:
+            st.caption(f"**Wilayah Tambang: {label_x_low}**")
+            data_low = chart_data[chart_data['X_Label'] == label_x_low]
+            base_l = alt.Chart(data_low).encode(theta=alt.Theta("Count", stack=True))
+            pie_l = base_l.mark_arc(outerRadius=80, innerRadius=50).encode(
+                color=alt.Color("Y_Label", scale=alt.Scale(domain=[label_y_low, label_y_high], range=['#E57373', '#81C784']), legend=None),
+                tooltip=["Y_Label", "Count"]
+            )
+            st.altair_chart(pie_l, use_container_width=True)
+        st.info("💡 **Legend**: Hijau = EBT Tinggi, Merah = EBT Rendah")
+
+    with st.expander("Lihat Detail Provinsi per Kategori"):
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown(f"**Provinsi: {label_x_high}**")
+            st.dataframe(df[df["X_Label"] == label_x_high][["Provinsi", mining_col, y_col]], use_container_width=True)
+        with c2:
+            st.markdown(f"**Provinsi: {label_x_low}**")
+            st.dataframe(df[df["X_Label"] == label_x_low][["Provinsi", mining_col, y_col]], use_container_width=True)
+
 
 # --- Divider ---
 st.markdown("---")
