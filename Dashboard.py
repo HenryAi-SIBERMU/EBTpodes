@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 import scipy.stats as stats
+import numpy as np
 import os
 import sys
 
@@ -549,6 +550,222 @@ else:
             st.markdown(f"**Provinsi: {label_x_low}**")
             st.dataframe(df[df["X_Label"] == label_x_low][["Provinsi", mining_col, y_col]], use_container_width=True)
 
+
+# ==========================================
+# 3. ANALISIS GAP POTENSI (Integrasi)
+# ==========================================
+st.markdown("---")
+st.header("Analisis Gap: Potensi vs Realisasi")
+st.markdown('<p style="font-size: 1rem; color: #66BB6A; font-weight: 500; margin-top: -15px;">Mengukur Disparitas Pemanfaatan Sumber Daya Alam</p>', unsafe_allow_html=True)
+
+# Use a clean dataframe copy for Phase 3
+df_gap = df_prov.copy()
+
+if df_gap.empty:
+    st.error("Data provinsi tidak ditemukan.")
+else:
+    # --- Methodology Section ---
+    with st.expander("ℹ️ Metodologi: Analisis Gap & Inefisiensi", expanded=False):
+        st.markdown("""
+        **Metode Analisis:**
+        Analisis ini menggunakan **Gap Ratio** dan **Ranking Efisiensi** untuk mengukur disparitas pemanfaatan energi terbarukan di tingkat provinsi.
+        
+        1.  **Formula Gap**: Menghitung selisih antara total desa yang memiliki potensi sumber daya alam dengan desa yang telah memiliki infrastruktur (Realisasi).
+            *   `Gap = Potensi - Realisasi`
+        
+        2.  **Formula Efisiensi**: Mengukur persentase desa yang memanfaatkan potensi EBT yang ada.
+            *   `Efisiensi = (Realisasi / Potensi) x 100%`
+        
+        3.  **Ranking**: Provinsi diurutkan berdasarkan rasio efisiensi terendah ke tertinggi.
+            *   Provinsi dengan **ranking terendah (Gap terbesar)** diutamakan karena memiliki potensi besar yang "terbuang" sia-sia.
+        """)
+
+    # --- 3.1 Control Panel ---
+    st.markdown("---")
+    col_ctrl1, col_ctrl2 = st.columns([1, 2])
+
+    with col_ctrl1:
+        st.subheader("⚙️ Konfigurasi")
+        energy_type = st.selectbox(
+            "Pilih Jenis Energi:",
+            ["Energi Air (Hydro)", "Energi Surya (Solar)"],
+            index=0,
+            key="dash_gap_energy_type"
+        )
+
+    # --- Logic Calculation ---
+    # 1. Define Columns & Labels based on Selection
+    if energy_type == "Energi Air (Hydro)":
+        # Priority: R511 > R1403g
+        col_potensi = "R511_potensi_air_2024" if "R511_potensi_air_2024" in df_gap.columns else "R1403g_potensi_air_2024"
+        col_realisasi = "R510_air_2024"
+        
+        label_potensi = "Jumlah Desa Memiliki Potensi Sumber Daya Air"
+        label_realisasi = "Jumlah Desa Memiliki Pembangkit Listrik (PLTA/Mikro/Pico)"
+        
+        color_range = ["#CFD8DC", "#4CAF50"] # Grey (Gap) vs Green (Realized)
+        highlight_color = "#4CAF50"
+        
+    elif energy_type == "Energi Surya (Solar)":
+        # Solar Potential
+        col_realisasi = "R502a_pju_surya_2024"
+        col_total = "R502a_pju_surya_2024_total"
+        col_potensi = "potensi_surya_calc"
+        
+        # Calculate Potential assuming all villages have solar potential
+        df_gap[col_potensi] = df_gap[col_total]
+        
+        label_potensi = "Total Desa (Potensi Teoritis)"
+        label_realisasi = "Jumlah Desa Memiliki PJU Tenaga Surya"
+        
+        color_range = ["#FFE0B2", "#FB8C00"] # Light Orange (Gap) vs Deep Orange (Realized)
+        highlight_color = "#FB8C00"
+
+    # 2. Data Preparation
+    df_gap[col_potensi] = pd.to_numeric(df_gap[col_potensi], errors='coerce').fillna(0)
+    df_gap[col_realisasi] = pd.to_numeric(df_gap[col_realisasi], errors='coerce').fillna(0)
+
+    # Calculate Gap
+    df_gap["Gap_Value"] = df_gap[col_potensi] - df_gap[col_realisasi]
+    df_gap["Gap_Value"] = df_gap["Gap_Value"].clip(lower=0)
+
+    # Calculate Utilization Ratio
+    df_gap["Util_Ratio"] = (df_gap[col_realisasi] / df_gap[col_potensi].replace(0, 1)) * 100
+
+    # Sort for Visualization
+    df_sorted = df_gap.sort_values("Gap_Value", ascending=False).head(10).reset_index(drop=True)
+
+    # 3. National Summary Stats
+    total_potensi = df_gap[col_potensi].sum()
+    total_realisasi = df_gap[col_realisasi].sum()
+    national_ratio = (total_realisasi / total_potensi * 100) if total_potensi > 0 else 0
+
+    with col_ctrl2:
+        st.markdown("##### Ringkasan Nasional")
+        m1, m2, m3 = st.columns(3)
+        
+        # CSS is already loaded at top of Dashboard, but we can add specific if needed.
+        # Re-using .metric-card style for consistency with Phase 3 standalone page if requested,
+        # but let's try to adapt to Dashboard's .stat-card or use inline style for specific colors.
+        # User requested "Colorful Cards" like Phase 2 (Green/Orange).
+        
+        with m1:
+            st.markdown(f"""
+            <div class="stat-card">
+                <div class="stat-label">Total Potensi</div>
+                <div class="stat-number" style="color: #E0E0E0;">{format_number(total_potensi)}</div>
+                <div style="font-size:0.75rem; color:#666;">Desa</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with m2:
+            st.markdown(f"""
+            <div class="stat-card">
+                <div class="stat-label">Total Realisasi</div>
+                <div class="stat-number" style="color: {highlight_color};">{format_number(total_realisasi)}</div>
+                <div style="font-size:0.75rem; color:#666;">Desa</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with m3:
+            st.markdown(f"""
+            <div class="stat-card" style="border-bottom: 2px solid {highlight_color};">
+                <div class="stat-label">Rasio Pemanfaatan</div>
+                <div class="stat-number" style="color: #FFC107;">{national_ratio:.2f}%</div>
+                <div style="font-size:0.75rem; color:#666;">Efficiency Rate</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    # --- 3.1 Visualization (Butterfly/Diverging Bar) ---
+    st.markdown("---")
+    st.subheader(f"3.1 Top 10 Provinsi dengan Disparitas Terbesar")
+    st.caption("Grafik menunjukkan besarnya **Potensi yang Belum Dimanfaatkan** (Kiri/Abu-abu) dibandingkan **Realisasi** (Kanan/Berwarna).")
+
+    # Prepare Data for Altair
+    viz_df = df_sorted[["Provinsi", "Gap_Value", col_realisasi, "Util_Ratio"]].copy()
+    viz_df = viz_df.rename(columns={"Gap_Value": "Belum Dimanfaatkan", col_realisasi: "Sudah Dimanfaatkan"})
+
+    # Melt
+    viz_melted = viz_df.melt(id_vars=["Provinsi", "Util_Ratio"], value_vars=["Belum Dimanfaatkan", "Sudah Dimanfaatkan"], var_name="Status", value_name="Jumlah")
+
+    # Calculate Display Value (Negative for Gap to align Left)
+    viz_melted["Display_Value"] = viz_melted.apply(lambda x: -x["Jumlah"] if x["Status"] == "Belum Dimanfaatkan" else x["Jumlah"], axis=1)
+
+    # Base Chart
+    base = alt.Chart(viz_melted).encode(
+        y=alt.Y("Provinsi", sort=None, axis=alt.Axis(title=None, labelFontWeight='bold')),
+        x=alt.X("Display_Value", title="Jumlah Desa", axis=alt.Axis(format="s")),
+        color=alt.Color("Status", scale=alt.Scale(domain=["Belum Dimanfaatkan", "Sudah Dimanfaatkan"], range=color_range), legend=alt.Legend(orient="top")),
+        tooltip=["Provinsi", "Status", alt.Tooltip("Jumlah", format=",d")]
+    )
+
+    # Bars
+    bars = base.mark_bar().properties(height=400)
+
+    # Text Labels (Numbers inside bars)
+    text = base.mark_text(
+        align='center',
+        baseline='middle',
+        dx=alt.expr("datum.Display_Value > 0 ? 20 : -20"),
+        color='white'
+    ).encode(
+        text=alt.Text("Jumlah", format=",")
+    )
+
+    st.altair_chart(bars + text, use_container_width=True)
+
+    # --- Detail Data View (Default Expanded) ---
+    with st.expander("📂 Lihat Data Lengkap (Semua Provinsi)", expanded=True):
+        table_df = df_gap[["Provinsi", col_potensi, col_realisasi, "Util_Ratio", "Gap_Value"]].sort_values("Util_Ratio")
+        st.dataframe(
+            table_df.style.format({
+                col_potensi: "{:,.0f}",
+                col_realisasi: "{:,.0f}",
+                "Util_Ratio": "{:.2f}%",
+                "Gap_Value": "{:,.0f}"
+            }).background_gradient(subset=["Util_Ratio"], cmap="RdYlGn"),
+            use_container_width=True
+        )
+        st.caption("*Data diurutkan berdasarkan Rasio Pemanfaatan terendah (Paling Kiri/Merah di gradien).*")
+
+    # --- 3.2 Linear Trendline Analysis (Advanced) ---
+    st.markdown("---")
+    st.subheader("3.2 Analisis Regresi: Efisiensi Pemanfaatan")
+    st.caption("Scatter plot ini menunjukkan provinsi yang **Under-perform** (Bawah Garis) vs **Over-perform** (Atas Garis) relatif terhadap potensi yang dimiliki.")
+
+    # Province Abbreviation Mapping (Decluttering)
+    prov_abbr = { "ACEH": "Aceh", "SUMATERA UTARA": "Sumut", "SUMATERA BARAT": "Sumbar", "RIAU": "Riau", "JAMBI": "Jambi", "SUMATERA SELATAN": "Sumsel", "BENGKULU": "Bengkulu", "LAMPUNG": "Lampung", "KEP. BANGKA BELITUNG": "Babel", "KEP. RIAU": "Kepri", "DKI JAKARTA": "DKI", "JAWA BARAT": "Jabar", "JAWA TENGAH": "Jateng", "DI YOGYAKARTA": "DIY", "JAWA TIMUR": "Jatim", "BANTEN": "Banten", "BALI": "Bali", "NUSA TENGGARA BARAT": "NTB", "NUSA TENGGARA TIMUR": "NTT", "KALIMANTAN BARAT": "Kalbar", "KALIMANTAN TENGAH": "Kalteng", "KALIMANTAN SELATAN": "Kalsel", "KALIMANTAN TIMUR": "Kaltim", "KALIMANTAN UTARA": "Kaltara", "SULAWESI UTARA": "Sulut", "SULAWESI TENGAH": "Sulteng", "SULAWESI SELATAN": "Sulsel", "SULAWESI TENGGARA": "Sultra", "GORONTALO": "Gorontalo", "SULAWESI BARAT": "Sulbar", "MALUKU": "Maluku", "MALUKU UTARA": "Malut", "PAPUA BARAT": "Pabar", "PAPUA": "Papua", "PAPUA SELATAN": "Papsel", "PAPUA TENGAH": "Papteng", "PAPUA PEGUNUNGAN": "Pappeg", "PAPUA BARAT DAYA": "Pabardya" }
+    df_gap["Provinsi_Abbr"] = df_gap["Provinsi"].map(prov_abbr).fillna(df_gap["Provinsi"])
+
+    # Scatter Plot
+    df_gap["Status_Efisiensi"] = df_gap["Util_Ratio"].apply(lambda x: "Efisien" if x >= national_ratio else "Inefisien")
+    color_scale = alt.Scale(domain=["Efisien", "Inefisien"], range=["#4CAF50", "#FF5252"])
+
+    base_chart = alt.Chart(df_gap).encode(
+        x=alt.X(col_potensi, title="Total Potensi (Log Scale)", scale=alt.Scale(type="symlog", zero=False)),
+        y=alt.Y(col_realisasi, title="Total Realisasi (Log Scale)", scale=alt.Scale(type="symlog", zero=False)) 
+    )
+
+    scatter_points = base_chart.mark_circle(size=120, opacity=0.8).encode(
+        color=alt.Color("Status_Efisiensi", scale=color_scale, legend=alt.Legend(title="Kinerja", orient="right")),
+        tooltip=["Provinsi", "Status_Efisiensi", alt.Tooltip(col_potensi, format=","), alt.Tooltip(col_realisasi, format=",")]
+    )
+
+    # National Average Line (Threshold)
+    max_pot = df_gap[col_potensi].max()
+    min_pot = df_gap[col_potensi].min()
+    if min_pot <= 0: min_pot = 1 
+
+    x_vals = np.geomspace(min_pot, max_pot, num=100)
+    y_vals = x_vals * (national_ratio / 100)
+
+    line_data = pd.DataFrame({ col_potensi: x_vals, col_realisasi: y_vals, "Label": ["Rata-rata Nasional"] * len(x_vals) })
+
+    threshold_line = alt.Chart(line_data).mark_line(color="#FFC107", strokeDash=[5,5], size=2).encode(x=alt.X(col_potensi), y=alt.Y(col_realisasi))
+
+    text_labels = base_chart.mark_text(align='left', baseline='middle', dx=8, fontSize=10, color='white').encode(text='Provinsi_Abbr')
+
+    final_scatter = (scatter_points + threshold_line + text_labels).properties(height=500).interactive()
+    st.altair_chart(final_scatter, use_container_width=True)
+    st.info("ℹ️ **Cara Membaca:** Garis putus-putus kuning adalah 'Garis Rata-rata Nasional'. Provinsi di **bawah garis** berarti efisiensinya di bawah rata-rata nasional (Inefisien/Merah). Provinsi di **atas garis** berarti efisiensinya di atas rata-rata nasional (Efisien/Hijau).")
 
 # --- Divider ---
 st.markdown("---")
