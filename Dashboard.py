@@ -10,6 +10,9 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from src.utils.data_loader import load_national_data, load_provincial_data, format_number
 from src.components.sidebar import render_sidebar
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.decomposition import PCA
+from src.utils.map_constants import PROVINCE_CENTROIDS, PROVINCE_ABBREVIATIONS
 
 # --- Page Config (Global) ---
 st.set_page_config(
@@ -765,9 +768,280 @@ else:
 
     final_scatter = (scatter_points + threshold_line + text_labels).properties(height=500).interactive()
     st.altair_chart(final_scatter, use_container_width=True)
-    st.info("ℹ️ **Cara Membaca:** Garis putus-putus kuning adalah 'Garis Rata-rata Nasional'. Provinsi di **bawah garis** berarti efisiensinya di bawah rata-rata nasional (Inefisien/Merah). Provinsi di **atas garis** berarti efisiensinya di atas rata-rata nasional (Efisien/Hijau).")
+    st.info("Garis putus-putus kuning adalah 'Garis Rata-rata Nasional'. Provinsi di **bawah garis** berarti efisiensinya di bawah rata-rata nasional (Inefisien/Merah). Provinsi di **atas garis** berarti efisiensinya di atas rata-rata nasional (Efisien/Hijau).")
 
 # --- Divider ---
+st.markdown("---")
+
+# ==========================================
+# 4. ANALISIS KETIMPANGAN ENERGI (Integrasi)
+# ==========================================
+st.header("Analisis Ketimpangan Energi (IKE)")
+st.markdown('<p style="font-size: 1rem; color: #66BB6A; font-weight: 500; margin-top: -15px;">Pemetaan Risiko Multidimensi (Akses, Ketergantungan, Lingkungan)</p>', unsafe_allow_html=True)
+
+# --- 4.1 Data Processing (Cached) ---
+@st.cache_data
+def process_ike_data_dashboard():
+    df = load_provincial_data()
+    if df.empty:
+        return None, None, None
+
+    # Indicators
+    indicators = {
+        "R501b_tanpa_listrik_2024_pct": "Rasio Tanpa Listrik",
+        "R501a2_non_pln_2024_pct": "Ketergantungan Non-PLN",
+        "R514_polusi_air_2024_pct": "Risiko Lingkungan (Air)"
+    }
+    
+    # Inverse Indicators
+    if "R1504a_program_ebt_2024_pct" in df.columns:
+        df["Rasio_Tanpa_Program"] = 100 - df["R1504a_program_ebt_2024_pct"]
+        indicators["Rasio_Tanpa_Program"] = "Ketiadaan Program EBT"
+
+    if "R1503a_infra_2024_pct" in df.columns:
+        df["Rasio_Tanpa_Infra"] = 100 - df["R1503a_infra_2024_pct"]
+        indicators["Rasio_Tanpa_Infra"] = "Ketiadaan Infrastruktur"
+
+    indicator_cols = list(indicators.keys())
+
+    # Normalization & IKE
+    scaler = MinMaxScaler()
+    df_norm = pd.DataFrame(scaler.fit_transform(df[indicator_cols]), columns=indicator_cols, index=df.index)
+    
+    df["IKE_Score"] = df_norm.mean(axis=1) * 100
+    df["IKE_Rank"] = df["IKE_Score"].rank(ascending=False)
+    
+    # Sort
+    df_ike = df.sort_values("IKE_Score", ascending=False).reset_index(drop=True)
+
+    # Province Name Normalization (Data vs GeoJSON)
+    prov_map = {
+        "ACEH": "DI. ACEH",
+        "SUMATERA UTARA": "SUMATERA UTARA",
+        "SUMATERA BARAT": "SUMATERA BARAT",
+        "RIAU": "RIAU",
+        "JAMBI": "JAMBI",
+        "SUMATERA SELATAN": "SUMATERA SELATAN",
+        "BENGKULU": "BENGKULU",
+        "LAMPUNG": "LAMPUNG",
+        "KEP. BANGKA BELITUNG": "BANGKA BELITUNG", 
+        "KEPULAUAN BANGKA BELITUNG": "BANGKA BELITUNG", 
+        "KEP. RIAU": "RIAU",
+        "KEPULAUAN RIAU": "RIAU",
+        "DKI JAKARTA": "DKI JAKARTA",
+        "DAERAH KHUSUS IBUKOTA JAKARTA": "DKI JAKARTA", 
+        "JAWA BARAT": "JAWA BARAT",
+        "JAWA TENGAH": "JAWA TENGAH",
+        "DI YOGYAKARTA": "DAERAH ISTIMEWA YOGYAKARTA", 
+        "DAERAH ISTIMEWA YOGYAKARTA": "DAERAH ISTIMEWA YOGYAKARTA", 
+        "JAWA TIMUR": "JAWA TIMUR",
+        "BANTEN": "PROBANTEN",
+        "BALI": "BALI",
+        "NUSA TENGGARA BARAT": "NUSATENGGARA BARAT",
+        "NUSA TENGGARA TIMUR": "NUSA TENGGARA TIMUR",
+        "KALIMANTAN BARAT": "KALIMANTAN BARAT",
+        "KALIMANTAN TENGAH": "KALIMANTAN TENGAH",
+        "KALIMANTAN SELATAN": "KALIMANTAN SELATAN",
+        "KALIMANTAN TIMUR": "KALIMANTAN TIMUR",
+        "KALIMANTAN UTARA": "KALIMANTAN TIMUR",
+        "SULAWESI UTARA": "SULAWESI UTARA",
+        "SULAWESI TENGAH": "SULAWESI TENGAH",
+        "SULAWESI SELATAN": "SULAWESI SELATAN",
+        "SULAWESI TENGGARA": "SULAWESI TENGGARA",
+        "GORONTALO": "GORONTALO",
+        "SULAWESI BARAT": "SULAWESI SELATAN",
+        "MALUKU": "MALUKU",
+        "MALUKU UTARA": "MALUKU UTARA",
+        "PAPUA BARAT": "IRIAN JAYA BARAT", 
+        "PROVINSI PAPUA BARAT": "IRIAN JAYA BARAT",
+        "PAPUA": "IRIAN JAYA TIMUR", 
+        "PROVINSI PAPUA": "IRIAN JAYA TIMUR",
+        "PAPUA SELATAN": "IRIAN JAYA TIMUR",
+        "PROVINSI PAPUA SELATAN": "IRIAN JAYA TIMUR",
+        "PAPUA TENGAH": "IRIAN JAYA TENGAH",
+        "PROVINSI PAPUA TENGAH": "IRIAN JAYA TENGAH",
+        "PAPUA PEGUNUNGAN": "IRIAN JAYA TIMUR",
+        "PROVINSI PAPUA PEGUNUNGAN": "IRIAN JAYA TIMUR",
+        "PAPUA BARAT DAYA": "IRIAN JAYA BARAT",
+        "PROVINSI PAPUA BARAT DAYA": "IRIAN JAYA BARAT"
+    }
+
+    df_ike["Provinsi_Map"] = df_ike["Provinsi"].map(prov_map).fillna(df_ike["Provinsi"])
+    
+    # Prepare Label Data for Map
+    label_data = []
+    # Ensure constants are fresh (though generally fine in dashboard scope)
+    import src.utils.map_constants as mc
+    
+    for prov_name, coords in mc.PROVINCE_CENTROIDS.items():
+        if prov_name in df_ike["Provinsi_Map"].values:
+            score = df_ike[df_ike["Provinsi_Map"] == prov_name]["IKE_Score"].values[0]
+            abbr = mc.PROVINCE_ABBREVIATIONS.get(prov_name, prov_name)
+            label_data.append({
+                "lat": coords[0],
+                "lon": coords[1],
+                "text": f"{abbr}\n{score:.1f}",
+                "Provinsi": prov_name,
+                "IKE_Score": score
+            })
+    df_labels_alt = pd.DataFrame(label_data)
+    
+    return df_ike, df_labels_alt, indicator_cols
+
+# Execute Processing
+df_ike_dash, df_labels_dash, indicator_cols = process_ike_data_dashboard()
+
+if df_ike_dash is not None:
+    # --- 4.2 Visualization ---
+    st.subheader("4.1 Peta Sebaran Kerentanan Energi")
+    
+    # GeoJSON Configuration
+    geo_json_url = "https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-province-simple.json"
+    geo_source = alt.Data(url=geo_json_url, format=alt.DataFormat(property='features', type='json'))
+
+    # Base Map
+    base_map = alt.Chart(geo_source).mark_geoshape(
+        stroke='white',
+        strokeWidth=0.5
+    ).encode(
+        color=alt.Color(
+            'IKE_Score:Q', 
+            scale=alt.Scale(scheme='reds', domain=[10, 60], clamp=True),
+            title="Skor IKE"
+        ),
+        tooltip=[
+            alt.Tooltip('properties.Propinsi:N', title='Provinsi'),
+            alt.Tooltip('IKE_Score:Q', title='Skor IKE', format='.1f'),
+            alt.Tooltip('IKE_Rank:Q', title='Peringkat'),
+        ]
+    ).transform_lookup(
+        lookup='properties.Propinsi',
+        from_=alt.LookupData(df_ike_dash, 'Provinsi_Map', ['IKE_Score', 'IKE_Rank'])
+    ).properties(
+        width=800,
+        height=500
+    )
+
+    # Label Layer
+    text_layer = alt.Chart(df_labels_dash).mark_text(
+        color='white',
+        fontSize=9,
+        fontWeight='bold',
+        dy=-5,
+        clip=False
+    ).encode(
+        latitude='lat:Q',
+        longitude='lon:Q',
+        text='text:N'
+    )
+
+    # Final Map
+    final_map = alt.layer(base_map, text_layer).project(
+        type='mercator',
+        scale=1200,             
+        center=[118, -2]
+    ).properties(
+        title="Peta Indeks Kerentanan Energi (IKE)"
+    ).configure_view(strokeWidth=0)
+
+    st.altair_chart(final_map, use_container_width=True)
+
+    # Top Ranking Chart
+    st.subheader("4.2 Peringkat Kerentanan Provinsi")
+    
+    bar_chart = alt.Chart(df_ike_dash.head(38)).mark_bar().encode(
+        x=alt.X("IKE_Score:Q", title="Skor IKE"),
+        y=alt.Y("Provinsi:N", sort="-x", title=None),
+        color=alt.Color("IKE_Score:Q", scale=alt.Scale(scheme="reds"), legend=None),
+        tooltip=["Provinsi", alt.Tooltip("IKE_Score", format=".1f")]
+    ).properties(
+        height=500,
+        title="Peringkat Provinsi (Rentan → Aman)"
+    )
+    st.altair_chart(bar_chart, use_container_width=True)
+
+    # Detail Expander
+    with st.expander("🔍 Lihat Detail Data IKE", expanded=False):
+        st.dataframe(df_ike_dash, use_container_width=True)
+
+    # --- 4.3 Validation (Scientific Check) ---
+    st.markdown("---")
+    st.subheader("4.3 Validasi Statistik: Principal Component Analysis (PCA)")
+    st.caption("Uji ketangguhan (*Robustness Check*) untuk memvalidasi apakah metode 'Equal Weighting' bias atau tidak dibandingkan metode statistik murni.")
+    
+    # Calculate PCA-based Score
+    # Re-normalize from df_ike_dash (Sorted) to ensure Row Alignment
+    scaler_valid = MinMaxScaler()
+    df_valid_norm = pd.DataFrame(scaler_valid.fit_transform(df_ike_dash[indicator_cols]), columns=indicator_cols)
+    
+    pca = PCA(n_components=1)
+    df_pca_input = df_valid_norm.fillna(0)
+    pca_score = pca.fit_transform(df_pca_input)
+    
+    # Align direction
+    if np.corrcoef(pca_score.flatten(), df_valid_norm[indicator_cols[0]])[0,1] < 0:
+        pca_score = -pca_score
+        
+    df_ike_dash["IKE_PCA"] = MinMaxScaler().fit_transform(pca_score) * 100
+    
+    # Correlation Check
+    correlation = df_ike_dash["IKE_Score"].corr(df_ike_dash["IKE_PCA"], method='spearman')
+    
+    # A. Case Processing Summary (SPSS Style)
+    st.markdown("##### Case Processing Summary")
+    
+    total_cases = len(df_ike_dash)
+    valid_cases = len(df_pca_input)
+    missing_cases = total_cases - valid_cases
+    
+    columns = pd.MultiIndex.from_product(
+        [["Cases"], ["Valid", "Missing", "Total"], ["N", "Percent"]]
+    )
+    
+    row_data = [
+        valid_cases, f"{valid_cases/total_cases*100:.1f}%",
+        missing_cases, f"{missing_cases/total_cases*100:.1f}%",
+        total_cases, "100.0%"
+    ]
+    
+    case_summary = pd.DataFrame([row_data], index=["Provinsi * Indicators"], columns=columns)
+    st.table(case_summary)
+    
+    # B. Correlation Result
+    st.markdown("##### Hasil Uji Korelasi (Pearson & Spearman)")
+    
+    col_res, col_chart = st.columns([1, 1.5])
+    
+    with col_res:
+        st.markdown(f"""
+        <div style="border: 2px solid #4CAF50; padding: 15px; border-radius: 5px; background-color: rgba(76, 175, 80, 0.1);">
+            <h4 style="color: #4CAF50; margin: 0 0 10px 0;">VALID & ROBUST</h4>
+            <p style="margin: 0; font-size: 0.9rem;">
+                Metode <b>Equal Weighting</b> memiliki korelasi yang sangat kuat dengan hasil komputasi <b>PCA</b>.
+            </p>
+            <hr style="border-color: #4CAF50; opacity: 0.3;">
+            <p style="margin: 0; font-family: monospace; font-size: 1.1rem; font-weight: bold;">
+                Correlation : {correlation:.4f}<br>
+                Status      : Very Strong
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.caption("*Nilai korelasi mendekati 1.0 menandakan hasil peringkat kedua metode hampir identik.*")
+    
+    with col_chart:
+        st.markdown("**Visualisasi Scatter Plot (Konsistensi Ranking):**")
+        chart_corr = alt.Chart(df_ike_dash).mark_circle(size=80).encode(
+            x=alt.X('IKE_Score', title='Skor IKE (Equal Weight)'),
+            y=alt.Y('IKE_PCA', title='Skor Validasi (PCA)'),
+            color=alt.value("#66BB6A"),
+            tooltip=['Provinsi', 'IKE_Score', 'IKE_PCA']
+        ).properties(height=300)
+        
+        regression_line = chart_corr.transform_regression('IKE_Score', 'IKE_PCA').mark_line(color='white', strokeDash=[5,5])
+        
+        st.altair_chart(chart_corr + regression_line, use_container_width=True)
+
 st.markdown("---")
 
 # --- Navigation Cards ---

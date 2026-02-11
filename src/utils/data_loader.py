@@ -26,7 +26,10 @@ def load_provincial_data():
     if not path:
         st.error(f"File not found: data/processed/provinsi_agregat.csv")
         return pd.DataFrame()
-    return pd.read_csv(path)
+    df = pd.read_csv(path)
+    # Clean data: Remove rows where 'Provinsi' is '.' or empty
+    df = df[~df['Provinsi'].isin(['.', '', ' '])].dropna(subset=['Provinsi'])
+    return df
 
 @st.cache_data
 def load_national_data():
