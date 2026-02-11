@@ -717,13 +717,13 @@ if "discovery_corpus" in st.session_state and st.session_state["discovery_corpus
         st.markdown("---")
         st.markdown("### Perbandingan: Metode Usulan vs Literatur")
         
-        top_10_methods = [m for m, _ in method_counter.most_common(15)]
+        all_detected_methods = [m for m, _ in method_counter.most_common()]
         
-        # Logic: Hitung Green (Direct) & Yellow (Indirect)
+        # Logic: Hitung Green (Direct) & Yellow (Indirect) dari SEMUA metode yang terdeteksi (No Cutoff)
         validated_coverage = set()
         evidence_list = []
         
-        for m in top_10_methods:
+        for m in all_detected_methods:
             if m in OUR_METHODS:
                 validated_coverage.add(m)
                 evidence_list.append(f"✅ {m}")
@@ -732,32 +732,33 @@ if "discovery_corpus" in st.session_state and st.session_state["discovery_corpus
                 validated_coverage.add(target)
                 evidence_list.append(f"🟡 {m} (→ {target})")
         
-        # Calculate remaining methods (Blue)
-        others_in_top = [m for m in top_10_methods if m not in OUR_METHODS and m not in similarity_map]
+        # Calculate remaining methods (Blue) - Tampilkan Top 10 Saja agar rapi
+        others_all = [m for m in all_detected_methods if m not in OUR_METHODS and m not in similarity_map]
+        others_top_10 = others_all[:10]
         
         m1, m2 = st.columns(2)
         with m1:
             st.markdown(f"""
             <div class="disc-card">
                 <div class="disc-title">✅ Metode Usulan yang Populer</div>
-                <div class="disc-sub">{"<br>".join(evidence_list) if evidence_list else "Tidak ada dalam Top 15"}</div>
+                <div class="disc-sub">{"<br>".join(evidence_list) if evidence_list else "Belum terdeteksi di corpus"}</div>
                 <div style="margin-top:10px; font-size:2rem; font-weight:800; color:#3fb950;">{len(validated_coverage)} / {len(OUR_METHODS)}</div>
-                <div class="stat-label">Metode Usulan Terverifikasi (Top 15 Literatures)</div>
+                <div class="stat-label">Metode Usulan Terverifikasi (Global)</div>
             </div>
             """, unsafe_allow_html=True)
         with m2:
             st.markdown(f"""
             <div class="disc-card">
-                <div class="disc-title">💡 Variasi Metode Lain Terdeteksi</div>
-                <div class="disc-sub">{"<br>".join(f"• {m}" for m in sorted(others_in_top)) if others_in_top else "Tidak ada"}</div>
-                <div style="margin-top:10px; font-size:2rem; font-weight:800; color:#58a6ff;">{len(others_in_top)}</div>
-                 <div class="stat-label">Metode Alternatif Populer</div>
+                <div class="disc-title">💡 Variasi Metode Lain (Top 10)</div>
+                <div class="disc-sub">{"<br>".join(f"• {m}" for m in sorted(others_top_10)) if others_top_10 else "Tidak ada"}</div>
+                <div style="margin-top:10px; font-size:2rem; font-weight:800; color:#58a6ff;">{len(others_all)}</div>
+                 <div class="stat-label">Total Variasi Metode Lain</div>
             </div>
             """, unsafe_allow_html=True)
             
         missing_ours = OUR_METHODS - validated_coverage
         if missing_ours:
-            st.warning(f"⚠️ Metode Usulan yang **belum** masuk Top 15 literatur: {', '.join(missing_ours)}")
+            st.warning(f"⚠️ Metode Usulan yang **belum** masuk literatur manapun: {', '.join(missing_ours)}")
         
         # ─── Method Co-occurrence Network ───────────────────────
         st.markdown("---")
