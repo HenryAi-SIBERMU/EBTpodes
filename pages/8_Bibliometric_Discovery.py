@@ -98,7 +98,7 @@ st.markdown("""
 # ─── Header ─────────────────────────────────────────────────────
 st.markdown('<div style="font-size:0.75rem; color:#58a6ff; letter-spacing:2px; text-transform:uppercase; margin-bottom:4px;">Analisis Bibliometric</div>', unsafe_allow_html=True)
 st.markdown("## 🔍 Discovery dari Literatur")
-st.markdown("Pendekatan terbalik: biarkan **literatur yang menentukan** metode analisis, bukan asumsi kita. Menggunakan **NLP** + **Bibliometric Network Analysis** terhadap riset energi perdesaan.")
+st.markdown("Menggunakan **NLP** + **Bibliometric Network Analysis** terhadap riset energi perdesaan untuk menentukan metode anlalisis")
 st.markdown("---")
 
 # ─── Research Topics (the queries) ──────────────────────────────
@@ -715,31 +715,47 @@ if "discovery_corpus" in st.session_state and st.session_state["discovery_corpus
         st.markdown("---")
         st.markdown("### Perbandingan: Metode Usulan vs Literatur")
         
-        top_10_methods = set(m for m, _ in method_counter.most_common(10))
-        our_in_top = OUR_METHODS & top_10_methods
-        our_not_in_top = OUR_METHODS - top_10_methods
-        lit_not_ours = top_10_methods - OUR_METHODS
+        top_10_methods = [m for m, _ in method_counter.most_common(10)]
+        
+        # Logic: Hitung Green (Direct) & Yellow (Indirect)
+        validated_coverage = set()
+        evidence_list = []
+        
+        for m in top_10_methods:
+            if m in OUR_METHODS:
+                validated_coverage.add(m)
+                evidence_list.append(f"✅ {m}")
+            elif m in similarity_map:
+                target = similarity_map[m]
+                validated_coverage.add(target)
+                evidence_list.append(f"🟡 {m} (→ {target})")
+        
+        # Calculate remaining methods (Blue)
+        others_in_top = [m for m in top_10_methods if m not in OUR_METHODS and m not in similarity_map]
         
         m1, m2 = st.columns(2)
         with m1:
             st.markdown(f"""
             <div class="disc-card">
                 <div class="disc-title">✅ Metode Usulan yang Populer</div>
-                <div class="disc-sub">{"<br>".join(f"• {m}" for m in sorted(our_in_top)) if our_in_top else "Tidak ada"}</div>
-                <div style="margin-top:10px; font-size:2rem; font-weight:800; color:#3fb950;">{len(our_in_top)} / {len(OUR_METHODS)}</div>
+                <div class="disc-sub">{"<br>".join(evidence_list) if evidence_list else "Tidak ada dalam Top 10"}</div>
+                <div style="margin-top:10px; font-size:2rem; font-weight:800; color:#3fb950;">{len(validated_coverage)} / {len(OUR_METHODS)}</div>
+                <div class="stat-label">Metode Usulan Terverifikasi (Direct/Proxy)</div>
             </div>
             """, unsafe_allow_html=True)
         with m2:
             st.markdown(f"""
             <div class="disc-card">
                 <div class="disc-title">💡 Variasi Metode Lain Terdeteksi</div>
-                <div class="disc-sub">{"<br>".join(f"• {m}" for m in sorted(lit_not_ours)) if lit_not_ours else "Tidak ada"}</div>
-                <div style="margin-top:10px; font-size:2rem; font-weight:800; color:#58a6ff;">{len(lit_not_ours)}</div>
+                <div class="disc-sub">{"<br>".join(f"• {m}" for m in sorted(others_in_top)) if others_in_top else "Tidak ada"}</div>
+                <div style="margin-top:10px; font-size:2rem; font-weight:800; color:#58a6ff;">{len(others_in_top)}</div>
+                 <div class="stat-label">Metode Alternatif Populer</div>
             </div>
             """, unsafe_allow_html=True)
-        
-        if our_not_in_top:
-            st.warning(f"⚠️ Metode Usulan yang **tidak** masuk Top 10 literatur: {', '.join(our_not_in_top)}")
+            
+        missing_ours = OUR_METHODS - validated_coverage
+        if missing_ours:
+            st.warning(f"⚠️ Metode Usulan yang **belum** masuk Top 10 literatur: {', '.join(missing_ours)}")
         
         # ─── Method Co-occurrence Network ───────────────────────
         st.markdown("---")
