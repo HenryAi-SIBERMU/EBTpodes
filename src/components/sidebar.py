@@ -32,7 +32,7 @@ def render_sidebar():
         st.markdown("---")
         
         # Custom Navigation
-        st.page_link("Dashboard.py", label="Dashboard", icon="🏠")
+        st.page_link("Dashboard.py", label="Dashboard", icon=None)
         
         st.markdown("### Analisis")
         st.page_link("pages/1_Overview_Nasional.py", label="Overview Nasional", icon=None)
