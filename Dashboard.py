@@ -143,9 +143,10 @@ st.markdown('<div class="org-badge">CELIOS — Center of Economic and Law Studie
 st.markdown('<div class="main-title">Energi Terbarukan Indonesia</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">Dashboard Analisis Data PODES 2024 vs 2021 — 84.276 Desa, 38 Provinsi, 10 Dimensi EBT<br><span style="font-size:0.9em; opacity:0.8; font-weight:400;">Riset 3 Narasi Strategis: Desa Tambang, Gap Potensi-Realisasi, & Ketimpangan Energi. <a href="Dokumentasi_Riset" target="_self" style="color:#66BB6A; text-decoration:none;">Klik</a></span></div>', unsafe_allow_html=True)
 
-# --- KPI Cards ---
-st.markdown("### Overview Nasional")
-st.markdown('<p style="font-size: 0.9rem; margin-bottom: 20px; color: #AAA;">Statistik Deskriptif & Analisis Tren (2021 vs 2024)</p>', unsafe_allow_html=True)
+# --- Phase 1: Overview Nasional ---
+st.markdown("---")
+st.header("Overview Nasional & Tren Energi Terbarukan")
+st.markdown('<p style="font-size: 1rem; color: #66BB6A; font-weight: 500; margin-top: -15px;">Statistik Deskriptif & Analisis Tren (2021 vs 2024)</p>', unsafe_allow_html=True)
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
@@ -196,7 +197,7 @@ with col4:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # --- Analysis: Trends & Comparison ---
-st.markdown("### Perbandingan Adopsi EBT: 2021 vs 2024")
+st.subheader("1.1 Perbandingan Adopsi EBT (2021 vs 2024)")
 
 indicators = [
     {"label": "PJU Surya (R502a)", "suffix": "R502a_pju_surya"},
@@ -254,8 +255,8 @@ if not df_chart.empty:
         st.altair_chart(c_desa, use_container_width=True)
 
 # --- Section: Keadilan Energi & Kedaulatan ---
-st.markdown("---")
-st.markdown("### Analisis Kritis: Keadilan & Kedaulatan Energi")
+st.markdown("<br>", unsafe_allow_html=True)
+st.subheader("1.2 Analisis Kritis: Keadilan & Kedaulatan Energi")
 st.info("Visualisasi ini menyoroti ketimpangan akses dan potensi lokal yang sering terabaikan.")
 
 c_crit1, c_crit2 = st.columns([1.5, 1])

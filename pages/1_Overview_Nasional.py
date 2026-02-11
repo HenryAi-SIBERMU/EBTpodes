@@ -44,8 +44,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("Overview Nasional: Tren Energi Terbarukan")
-st.markdown("Statistik Deskriptif & Analisis Tren (2021 vs 2024)")
+st.title("Overview Nasional & Tren Energi Terbarukan")
+st.markdown('<p style="font-size: 1.1rem; color: #66BB6A; font-weight: 500; margin-top: -15px;">Statistik Deskriptif & Analisis Tren (2021 vs 2024)</p>', unsafe_allow_html=True)
 
 if df_nasional.empty:
     st.error("Data Nasional tidak ditemukan. Pastikan proses pipeline data berhasil.")
@@ -133,7 +133,7 @@ def classify_growth(growth):
     return "Unknown"
 
 # --- Chart: 2021 vs 2024 Comparison (Dumbbell Plot) ---
-st.subheader("Perbandingan Adopsi EBT: 2021 vs 2024")
+st.subheader("1.1 Perbandingan Adopsi EBT (2021 vs 2024)")
 
 indicators = [
     {"label": "PJU Surya (R502a)", "suffix": "R502a_pju_surya"},
@@ -207,7 +207,7 @@ if not df_chart.empty:
 
     # --- Section: Analisis Kritis (Keadilan Energi & Dampak Lingkungan) ---
     st.markdown("---")
-    st.header("Analisis Kritis: Keadilan Energi & Dampak Lingkungan")
+    st.subheader("1.2 Analisis Kritis: Keadilan & Kedaulatan Energi")
     st.info("Bagian ini menyoroti ketimpangan energi dan risiko lingkungan yang sering terabaikan dalam narasi transisi energi arus utama.")
 
     c1, c2 = st.columns(2)
