@@ -15,8 +15,8 @@ from src.utils.map_constants import PROVINCE_CENTROIDS, PROVINCE_ABBREVIATIONS
 
 # --- Page Config ---
 st.set_page_config(
-    page_title="Indeks Kerentanan Energi (IKE) — CELIOS EBT",
-    page_icon="⚠️",
+    page_title="Ketimpangan Energi (IKE) — CELIOS EBT",
+    page_icon="refrensi/Celios China-Indonesia Energy Transition.png",
     layout="wide"
 )
 

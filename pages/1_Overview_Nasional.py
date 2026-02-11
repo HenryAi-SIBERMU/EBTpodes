@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from src.utils.data_loader import load_national_data, load_provincial_data, format_number, calculate_growth_color
 from src.components.sidebar import render_sidebar
 
-st.set_page_config(page_title="Overview Nasional — CELIOS EBT", page_icon="🏠", layout="wide")
+st.set_page_config(page_title="Overview Nasional — CELIOS EBT", page_icon="refrensi/Celios China-Indonesia Energy Transition.png", layout="wide")
 render_sidebar()
 
 # --- Load Data ---

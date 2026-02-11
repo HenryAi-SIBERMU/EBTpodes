@@ -5,8 +5,8 @@ from src.components.sidebar import render_sidebar
 
 st.set_page_config(
     page_title="Dokumentasi Riset — CELIOS EBT",
-    page_icon=os.path.join(os.path.dirname(os.path.dirname(__file__)), "refrensi", "Celios China-Indonesia Energy Transition.png"),
-    layout="wide",
+    page_icon="refrensi/Celios China-Indonesia Energy Transition.png",
+    layout="wide"
 )
 render_sidebar()
 

@@ -17,6 +17,13 @@ import sys
 import time
 from pathlib import Path
 
+# ─── Page Config ────────────────────────────────────────────────
+st.set_page_config(
+    page_title="Validasi Metode NLP — CELIOS EBT",
+    page_icon="refrensi/Celios China-Indonesia Energy Transition.png",
+    layout="wide"
+)
+
 # ─── Cache File Path ────────────────────────────────────────────
 BASE_DIR = Path(os.path.dirname(os.path.dirname(__file__)))
 CORPUS_FILE = BASE_DIR / "research_results" / "corpus.json"

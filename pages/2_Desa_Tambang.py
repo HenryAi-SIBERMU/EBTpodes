@@ -7,8 +7,8 @@ from src.utils.data_loader import load_provincial_data, format_number
 
 # --- Page Config ---
 st.set_page_config(
-    page_title="Analisis Desa Tambang",
-    page_icon="⛏️",
+    page_title="Analisis Desa Tambang — CELIOS",
+    page_icon="refrensi/Celios China-Indonesia Energy Transition.png",
     layout="wide"
 )
 

@@ -16,8 +16,8 @@ from src.utils.map_constants import PROVINCE_CENTROIDS, PROVINCE_ABBREVIATIONS
 
 # --- Page Config (Global) ---
 st.set_page_config(
-    page_title="CELIOS — EBT Dashboard",
-    page_icon=os.path.join(os.path.dirname(__file__), "refrensi", "Celios China-Indonesia Energy Transition.png"),
+    page_title="Dashboard Analisis EBT & Perdesaan",
+    page_icon="refrensi/Celios China-Indonesia Energy Transition.png",
     layout="wide",
     initial_sidebar_state="expanded",
 )

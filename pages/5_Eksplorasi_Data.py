@@ -3,7 +3,11 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from src.components.sidebar import render_sidebar
 
-st.set_page_config(page_title="Eksplorasi Data — CELIOS EBT", page_icon="📊", layout="wide")
+st.set_page_config(
+    page_title="Eksplorasi Data — CELIOS EBT",
+    page_icon="refrensi/Celios China-Indonesia Energy Transition.png",
+    layout="wide"
+)
 render_sidebar()
 
 st.markdown("""
