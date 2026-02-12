@@ -277,12 +277,10 @@ scatter_points = base_chart.mark_circle(size=120, opacity=0.8).encode(
 # Use dense points to ensure line renders correctly in Symlog scale (which might curve)
 import numpy as np
 
-max_pot = df[col_potensi].max()
-min_pot = df[col_potensi].min()
-if min_pot <= 0: min_pot = 1 # Avoid log(0) issues for line start
-
-# Generate dense X points (log-spaced)
-x_vals = np.geomspace(min_pot, max_pot, num=100)
+# Extend slightly beyond max to cover chart edges
+max_pot_data = df[col_potensi].max()
+# Start from 0 to cover origin, go up to 2x max (ensure > 1)
+x_vals = np.concatenate(([0], np.geomspace(1, max(max_pot_data, 1.0) * 2, num=200))) 
 # Calculate Y based on National Ratio (y = x * ratio)
 y_vals = x_vals * (national_ratio / 100)
 
@@ -315,3 +313,112 @@ final_scatter = (scatter_points + threshold_line + text_labels).properties(heigh
 st.altair_chart(final_scatter, use_container_width=True)
 
 st.info("ℹ️ **Cara Membaca:** Garis putus-putus kuning adalah 'Garis Rata-rata Nasional'. Provinsi di **bawah garis** berarti efisiensinya di bawah rata-rata nasional (Inefisien/Merah). Provinsi di **atas garis** berarti efisiensinya di atas rata-rata nasional (Efisien/Hijau).")
+
+# --- 3.3 Trend Analysis (Moved from Phase 5) ---
+st.markdown("---")
+st.subheader("3.3 Tren Perubahan 2021 → 2024")
+st.caption("Analisis ini menunjukkan apakah provinsi mengalami **Kemajuan (Membaik)** atau **Kemunduran (Memburuk)** dalam 3 tahun terakhir.")
+
+# Mapping friendly names to logic columns
+VARS_TREND = {
+    "PJU Tenaga Surya": {"col_24": "R502a_pju_surya_2024", "col_21": "R502a_pju_surya_2021", "unit": "Desa", "invert": False},
+    "Keluarga Pengguna Surya": {"col_24": "R501c_keluarga_surya_2024", "col_21": "R501c_keluarga_surya_2021", "unit": "KK", "invert": False},
+    "Pengguna Biogas": {"col_24": "R503a6_bioenergi_2024", "col_21": "R503a6_bioenergi_2021", "unit": "KK", "invert": False},
+    "Pemanfaatan Air (PLTA/Mikro)": {"col_24": "R510_air_2024", "col_21": "R510_air_2021", "unit": "Desa", "invert": False},
+    "Keluarga Tanpa Listrik": {"col_24": "R501b_tanpa_listrik_2024", "col_21": "R501b_tanpa_listrik_2021", "unit": "KK", "invert": True},
+    "Pencemaran Air": {"col_24": "R514_polusi_air_2024", "col_21": "R514_polusi_air_2021", "unit": "Desa", "invert": True},
+    "Desa Tambang": {"col_24": "tambang_2024", "col_21": "tambang_2021", "unit": "Desa", "invert": True},
+}
+
+c_trend1, c_trend2 = st.columns([1, 3])
+
+with c_trend1:
+    selected_trend_metric = st.selectbox("Pilih Indikator Tren:", list(VARS_TREND.keys()))
+    
+    meta = VARS_TREND[selected_trend_metric]
+    col24 = meta["col_24"]
+    col21 = meta["col_21"]
+    unit = meta["unit"]
+    is_inverted = meta["invert"]
+
+# Process Data for Chart
+trend_df = df[["Provinsi", col24, col21]].copy()
+trend_df = trend_df.fillna(0)
+
+# Calculate Metrics
+trend_df["Delta"] = trend_df[col24] - trend_df[col21]
+
+def calc_growth(row):
+    v21 = row[col21]
+    v24 = row[col24]
+    if v21 > 0:
+        return ((v24 - v21) / v21) * 100
+    elif v24 > 0:
+        return 100.0
+    else:
+        return 0.0
+
+trend_df["Growth_Pct"] = trend_df.apply(calc_growth, axis=1)
+
+# Classification
+def classify(row):
+    g = row["Growth_Pct"]
+    val24 = row[col24]
+    val21 = row[col21]
+    
+    if val24 == val21: return "Stagnan"
+    
+    if is_inverted:
+        if g < -5: return "Membaik"
+        elif g > 5: return "Memburuk"
+        else: return "Stagnan"
+    else:
+        if g > 5: return "Membaik"
+        elif g < -5: return "Memburuk"
+        else: return "Stagnan"
+
+trend_df["Status"] = trend_df.apply(classify, axis=1)
+
+# Colors
+domain = ["Membaik", "Stagnan", "Memburuk"]
+range_ = ["#4CAF50", "#757575", "#EF5350"]
+
+with c_trend2:
+    st.subheader(f"Pergeseran Nilai: {selected_trend_metric}")
+    
+    # Slope Chart (Dumbbell)
+    slope_data = pd.melt(trend_df, id_vars=["Provinsi", "Status"], value_vars=[col21, col24], var_name="Tahun_Col", value_name="Nilai")
+    slope_data["Tahun"] = slope_data["Tahun_Col"].apply(lambda x: "2024" if "2024" in x else "2021")
+    
+    sort_order = trend_df.sort_values(col24, ascending=False)["Provinsi"].tolist()
+
+    c_slope = alt.Chart(slope_data).mark_line(point=True).encode(
+        x=alt.X("Nilai", title=f"Jumlah ({unit})"),
+        y=alt.Y("Provinsi", sort=sort_order),
+        color=alt.Color("Status", scale=alt.Scale(domain=domain, range=range_)),
+        detail="Provinsi",
+        tooltip=["Provinsi", "Tahun", "Nilai", "Status"]
+    ).properties(height=600, title="2021 → 2024")
+    
+    st.altair_chart(c_slope, use_container_width=True)
+
+# Summary Stats
+st.markdown("##### Ringkasan Status Trend")
+c_stat1, c_stat2, c_stat3 = st.columns(3)
+improving = trend_df[trend_df["Status"] == "Membaik"].shape[0]
+worsening = trend_df[trend_df["Status"] == "Memburuk"].shape[0]
+stagnant = trend_df[trend_df["Status"] == "Stagnan"].shape[0]
+
+c_stat1.metric("Provinsi Membaik", f"{improving} Prov")
+c_stat2.metric("Provinsi Memburuk", f"{worsening} Prov")
+c_stat3.metric("Stagnan / Stabil", f"{stagnant} Prov")
+
+# Detail Table
+with st.expander("📂 Lihat Detail Tren per Provinsi", expanded=False):
+    st.dataframe(
+        trend_df[["Provinsi", col21, col24, "Delta", "Growth_Pct", "Status"]]
+        .sort_values("Growth_Pct", ascending=is_inverted)
+        .style.format({col21: "{:,.0f}", col24: "{:,.0f}", "Delta": "{:+,.0f}", "Growth_Pct": "{:+.2f}%"})
+        .applymap(lambda v: f"color: {'#4CAF50' if v == 'Membaik' else '#EF5350' if v == 'Memburuk' else '#AAA'}", subset=["Status"]),
+        use_container_width=True
+    )

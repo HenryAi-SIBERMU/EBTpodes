@@ -753,11 +753,10 @@ else:
     )
 
     # National Average Line (Threshold)
-    max_pot = df_gap[col_potensi].max()
-    min_pot = df_gap[col_potensi].min()
-    if min_pot <= 0: min_pot = 1 
-
-    x_vals = np.geomspace(min_pot, max_pot, num=100)
+    # Max possible value for line extension
+    max_pot_data = df_gap[col_potensi].max()
+    # Start from 0 to cover origin, go up to 2x max (safety check for 0)
+    x_vals = np.concatenate(([0], np.geomspace(1, max(max_pot_data, 1.0) * 2, num=200))) 
     y_vals = x_vals * (national_ratio / 100)
 
     line_data = pd.DataFrame({ col_potensi: x_vals, col_realisasi: y_vals, "Label": ["Rata-rata Nasional"] * len(x_vals) })
